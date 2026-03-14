@@ -16,14 +16,19 @@
 ai-engine/
 ├── apps/
 │   ├── server/              # NestJS 后端 (端口 3000)
+│   │   ├── prisma/          # Prisma ORM（schema + migrations）
+│   │   └── src/
+│   │       ├── common/      # 服务端工具函数
+│   │       ├── modules/     # 业务模块（app, model, chat, workflow）
+│   │       └── prisma/      # PrismaService
 │   └── web/                 # Next.js 前端 (端口 3001)
 ├── packages/
 │   ├── core/                # 核心引擎（工作流执行器）
 │   ├── providers/           # LLM 提供商（阿里云、Ollama）
-│   └── shared/              # 共享类型、工具
+│   └── shared/              # 共享类型定义（仅 types）
 ├── docker/
-├── prisma/
-└── docs/
+├── docs/
+└── prisma/                  # 已移至 apps/server/prisma/
 ```
 
 ---
@@ -229,6 +234,58 @@ ai-engine/
   - `useApps()` Hook
   - `useModels()` Hook
   - 错误提示 (sonner/toast)
+
+---
+
+## 阶段 2：应用管理模块 ✅ 已完成（2026-03-14）
+
+### 2.1 数据库模型 ✅
+- [x] **2.1.1** App 模型定义 ✅ 2026-03-14
+  - 字段：id, name, description, apiKey, modelId, config, timestamps
+  - 索引优化
+
+- [x] **2.1.2** Model 模型定义 ✅ 2026-03-14
+  - 字段：id, name, provider, model, config, enabled, isDefault, timestamps
+  - 预置模型数据种子（阿里云 + Ollama）
+
+- [x] **2.1.3** 数据库迁移 ✅ 2026-03-14
+  - Prisma migrate
+  - Seed 数据脚本
+
+### 2.2 后端 API ✅
+- [x] **2.2.1** Auth 模块 ✅ 2026-03-14
+  - API Key 认证中间件
+  - `@Public()` 装饰器
+  - ApiKeyGuard
+
+- [x] **2.2.2** App 模块 - 控制器 ✅ 2026-03-14
+  - `POST /api/apps` (创建应用)
+  - `GET /api/apps` (应用列表)
+  - `GET /api/apps/:id` (应用详情)
+  - `PATCH /api/apps/:id` (更新应用)
+  - `DELETE /api/apps/:id` (删除应用)
+  - `POST /api/apps/:id/regenerate-key` (重置 API Key)
+
+- [x] **2.2.3** App 模块 - 服务层 ✅ 2026-03-14
+  - AppService CRUD
+  - API Key 生成逻辑
+  - Prisma 集成
+
+- [x] **2.2.4** App 模块 - DTO ✅ 2026-03-14
+  - CreateAppDto
+  - UpdateAppDto
+  - AppResponseDto
+
+- [x] **2.2.5** Model 模块 ✅ 2026-03-14
+  - `GET /api/models` (模型列表)
+  - `GET /api/models/default/active` (默认模型)
+  - ModelService CRUD
+
+### 2.3 前端界面 ⏳ 待开发
+- [ ] **2.3.1** 应用列表页
+- [ ] **2.3.2** 应用创建/编辑表单
+- [ ] **2.3.3** 应用详情页
+- [ ] **2.3.4** API 客户端封装
 
 ---
 
@@ -644,11 +701,17 @@ ai-engine/
   - PostgreSQL: localhost:5432
   - Redis: localhost:6379
 
-#### 阶段 2：应用管理模块
-- 开始日期：____-__-__
-- 完成日期：____-__-__
-- 实际耗时：__ 天
+#### 阶段 2：应用管理模块 ✅
+- 开始日期：2026-03-14
+- 完成日期：2026-03-14
+- 实际耗时：1 天（含 Monorepo 重构 40 分钟）
 - 备注：
+  - ✅ 应用管理 API 完成（CRUD + API Key 认证）
+  - ✅ 模型管理 API 完成（CRUD + 默认模型）
+  - ✅ Prisma 重构完成（移至 apps/server/prisma/）
+  - ✅ TypeScript 编译 0 错误
+  - ✅ 服务正常运行
+  - ⏳ 前端界面待开发
 
 #### 阶段 3：对话引擎
 - 开始日期：____-__-__
@@ -682,16 +745,70 @@ ai-engine/
 
 ---
 
+## Monorepo 重构记录
+
+### 重构日期：2026-03-14
+### 重构目标：解决 Prisma 与 pnpm workspace 兼容性问题
+### 重构耗时：40 分钟
+### 重构成果：
+- ✅ Prisma 移至 `apps/server/prisma/`
+- ✅ packages/shared 精简为仅类型定义
+- ✅ 工具函数移至 `apps/server/src/common/utils/`
+- ✅ TypeScript 路径映射优化
+- ✅ Prisma Client 生成成功
+- ✅ 0 编译错误
+
+### 关键变更：
+- 导入路径：`@ai-engine/shared/utils` → `@/common/utils`
+- Prisma 路径：`/prisma` → `/apps/server/prisma`
+- 新增路径映射：`@/*` → `./src/*`
+
+详见：[docs/RESTRUCTURE-PLAN.md](./RESTRUCTURE-PLAN.md)
+
+---
+
 ## 备注与问题记录
 
 ### 技术问题
-- 
+- 无（所有问题已解决）
 
 ### 设计变更
-- 
+- ✅ Monorepo 重构完成（2026-03-14）
+- ✅ Prisma 移至服务层
+- ✅ packages/shared 精简为仅类型定义
 
 ### 待决策事项
-- 
+- 前端 UI 开发优先级
+- LLM 提供商接入顺序（阿里云 vs Ollama）
+- 工作流引擎实现方案
+
+### 当前服务状态（2026-03-14 21:12）
+- ✅ **NestJS 后端**: http://localhost:3000
+- ✅ **Swagger 文档**: http://localhost:3000/docs
+- ✅ **PostgreSQL**: localhost:5432 (healthy)
+- ✅ **Redis**: localhost:6379 (healthy)
+
+### 已验证的 API
+```bash
+# 健康检查
+curl http://localhost:3000/api/health
+
+# 获取默认模型
+curl http://localhost:3000/api/models/default/active
+
+# 获取模型列表
+curl http://localhost:3000/api/models
+
+# 创建应用
+curl -X POST http://localhost:3000/api/apps \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: test-key" \
+  -d '{"name":"测试应用","description":"测试描述"}'
+
+# 获取应用列表
+curl http://localhost:3000/api/apps \
+  -H "X-API-Key: test-key"
+``` 
 
 ---
 
