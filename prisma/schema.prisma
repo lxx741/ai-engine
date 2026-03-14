@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Application Management
+// ============================================
+
+/// AI 应用表
+model App {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  apiKey      String   @unique
+  modelId     String?
+  config      Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  conversations Conversation[]
+  workflows     Workflow[]
+
+  @@index([apiKey])
+  @@map("apps")
+}
+
+/// 模型配置表
+model Model {
+  id        String   @id @default(uuid())
+  name      String
+  provider  String   // aliyun, ollama, openai, etc.
+  model     String   // 具体模型名称
+  config    Json     @default("{}")
+  enabled   Boolean  @default(true)
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("models")
+}
+
+// ============================================
+// Chat & Conversation
+// ============================================
+
+/// 会话表
+model Conversation {
+  id        String   @id @default(uuid())
+  appId     String
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  messages Message[]
+
+  @@index([appId])
+  @@map("conversations")
+}
+
+/// 消息表
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String       // user, assistant, system
+  content        String
+  tokens         Int?
+  metadata       Json         @default("{}")
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@map("messages")
+}
+
+// ============================================
+// Workflow Engine
+// ============================================
+
+/// 工作流表
+model Workflow {
+  id          String         @id @default(uuid())
+  appId       String
+  app         App            @relation(fields: [appId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  definition  Json           // 工作流 DAG 定义
+  status      String         @default("draft") // draft, published, archived
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  runs WorkflowRun[]
+
+  @@index([appId])
+  @@map("workflows")
+}
+
+/// 工作流执行记录
+model WorkflowRun {
+  id         String   @id @default(uuid())
+  workflowId String
+  workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  status     String   @default("pending") // pending, running, success, failed, cancelled
+  input      Json     @default("{}")
+  output     Json?
+  error      String?
+  startedAt  DateTime?
+  completedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([workflowId])
+  @@map("workflow_runs")
+}
+
+// ============================================
+// Audit & Logs
+// ============================================
+
+/// 审计日志表
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  entity    String
+  entityId  String?
+  userId    String?
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([entity])
+  @@map("audit_logs")
+}

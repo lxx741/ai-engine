@@ -76,17 +76,17 @@ ai-engine/
   - `.env.local` (本地开发)
 
 ### 1.3 后端服务初始化 (NestJS)
-- [ ] **1.3.1** NestJS 项目创建
+- [x] **1.3.1** NestJS 项目创建 ✅ 2026-03-14
   - `apps/server` 目录初始化
   - NestJS CLI 脚手架
   - 基础模块结构
 
-- [ ] **1.3.2** Prisma ORM 集成
+- [x] **1.3.2** Prisma ORM 集成 ✅ 2026-03-14
   - `prisma/schema.prisma` 数据库模型
   - Prisma Client 生成
   - 数据库迁移脚本
 
-- [ ] **1.3.3** 基础依赖安装
+- [x] **1.3.3** 基础依赖安装 ✅ 2026-03-14
   - `@nestjs/*` 核心模块
   - `prisma` + `@prisma/client`
   - `winston` (日志)
@@ -94,12 +94,12 @@ ai-engine/
   - `@nestjs/config` (配置管理)
   - `@nestjs/swagger` (API 文档)
 
-- [ ] **1.3.4** 项目结构规范
+- [x] **1.3.4** 项目结构规范 ✅ 2026-03-14
   - 模块目录结构
   - DTO 规范
   - 响应格式统一
 
-- [ ] **1.3.5** 开发服务器配置
+- [x] **1.3.5** 开发服务器配置 ✅ 2026-03-14
   - `nest-cli.json`
   - `tsconfig.build.json`
   - `scripts/dev:server.sh`
