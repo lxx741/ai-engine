@@ -130,31 +130,31 @@ ai-engine/
   - `scripts/dev:web.sh`
 
 ### 1.5 共享包初始化
-- [ ] **1.5.1** `packages/shared` 创建
+- [x] **1.5.1** `packages/shared` 创建 ✅ 2026-03-14
   - 通用工具函数
   - 类型定义
   - 常量配置
 
-- [ ] **1.5.2** `packages/core` 创建
+- [x] **1.5.2** `packages/core` 创建 ✅ 2026-03-14
   - 工作流引擎核心接口
   - 执行器抽象类
 
-- [ ] **1.5.3** `packages/providers` 创建
+- [x] **1.5.3** `packages/providers` 创建 ✅ 2026-03-14
   - LLM 提供商抽象接口
-  - 阿里云百炼适配器骨架
-  - Ollama 适配器骨架
+  - 阿里云百炼适配器
+  - Ollama 适配器
 
 ### 1.6 开发工具链
-- [ ] **1.6.1** 统一启动脚本
+- [x] **1.6.1** 统一启动脚本 ✅ 2026-03-14
   - `package.json` scripts
   - `pnpm dev` (同时启动前后端)
   - `pnpm dev:server` / `pnpm dev:web`
 
-- [ ] **1.6.2** Docker 开发环境
+- [x] **1.6.2** Docker 开发环境 ✅ 2026-03-14
   - 热重载配置
   - 调试配置
 
-- [ ] **1.6.3** API 文档
+- [x] **1.6.3** API 文档 ✅ 2026-03-14
   - Swagger UI 配置
   - OpenAPI 规范
 
