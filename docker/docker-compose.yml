@@ -1,0 +1,50 @@
+services:
+  # PostgreSQL with pgvector extension
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ai-engine-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-aiengine}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-aiengine123}
+      POSTGRES_DB: ${DB_NAME:-aiengine}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ai-engine-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-aiengine} -d ${DB_NAME:-aiengine}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and task queue
+  redis:
+    image: redis:7-alpine
+    container_name: ai-engine-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-aiengine123}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ai-engine-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD:-aiengine123}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  ai-engine-network:
+    driver: bridge

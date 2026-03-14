@@ -57,21 +57,21 @@ ai-engine/
   - `.gitattributes`
 
 ### 1.2 Docker 环境搭建
-- [ ] **1.2.1** PostgreSQL 容器配置
+- [x] **1.2.1** PostgreSQL 容器配置 ✅ 2026-03-14
   - `docker-compose.yml` (PostgreSQL 16 + pgvector 扩展)
   - 初始化脚本
   - 数据卷持久化
 
-- [ ] **1.2.2** Redis 容器配置
+- [x] **1.2.2** Redis 容器配置 ✅ 2026-03-14
   - Redis 7+ 配置
   - 密码认证（可选）
 
-- [ ] **1.2.3** 一键启动脚本
+- [x] **1.2.3** 一键启动脚本 ✅ 2026-03-14
   - `docker-compose up -d`
   - 健康检查
   - `scripts/dev-setup.sh`
 
-- [ ] **1.2.4** 环境配置模板
+- [x] **1.2.4** 环境配置模板 ✅ 2026-03-14
   - `.env.example`
   - `.env.local` (本地开发)
 
