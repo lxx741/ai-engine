@@ -105,26 +105,26 @@ ai-engine/
   - `scripts/dev:server.sh`
 
 ### 1.4 前端服务初始化 (Next.js)
-- [ ] **1.4.1** Next.js 项目创建
+- [x] **1.4.1** Next.js 项目创建 ✅ 2026-03-14
   - `apps/web` 目录初始化
   - Next.js 14 App Router
   - TypeScript 配置
 
-- [ ] **1.4.2** shadcn/ui 集成
+- [x] **1.4.2** shadcn/ui 集成 ✅ 2026-03-14
   - TailwindCSS 配置
   - shadcn/ui CLI 初始化
-  - 基础组件安装 (Button, Input, Card 等)
+  - 基础组件安装 (Button, Input, Card, Label)
 
-- [ ] **1.4.3** 状态管理
+- [x] **1.4.3** 状态管理 ✅ 2026-03-14
   - Zustand 或 Jotai (轻量级状态)
   - React Query (数据获取)
 
-- [ ] **1.4.4** API 客户端
+- [x] **1.4.4** API 客户端 ✅ 2026-03-14
   - Axios 或 Fetch 封装
   - API Hook 封装
   - 错误处理
 
-- [ ] **1.4.5** 开发服务器配置
+- [x] **1.4.5** 开发服务器配置 ✅ 2026-03-14
   - `next.config.js`
   - `tailwind.config.js`
   - `scripts/dev:web.sh`
