@@ -1,0 +1,11 @@
+node_modules
+dist
+build
+.next
+coverage
+*.min.js
+*.bundle.js
+pnpm-lock.yaml
+package.json
+tsconfig.json
+tsconfig.*.json

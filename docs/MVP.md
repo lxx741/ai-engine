@@ -31,28 +31,28 @@ ai-engine/
 ## 阶段 1：项目初始化（预计 2-3 天）
 
 ### 1.1 Monorepo 架构搭建
-- [ ] **1.1.1** 创建项目根目录结构
+- [x] **1.1.1** 创建项目根目录结构 ✅ 2026-03-14
   - `apps/` (server, web)
   - `packages/` (core, providers, shared)
   - `docker/`
   - `prisma/`
 
-- [ ] **1.1.2** 配置 pnpm workspace
+- [x] **1.1.2** 配置 pnpm workspace ✅ 2026-03-14
   - 根目录 `package.json` (workspace 配置)
   - `pnpm-workspace.yaml`
   - `.npmrc` (pnpm 配置)
 
-- [ ] **1.1.3** TypeScript 根配置
+- [x] **1.1.3** TypeScript 根配置 ✅ 2026-03-14
   - `tsconfig.json` (基础配置)
   - `tsconfig.server.json`
   - `tsconfig.web.json`
 
-- [ ] **1.1.4** ESLint + Prettier 统一配置
+- [x] **1.1.4** ESLint + Prettier 统一配置 ✅ 2026-03-14
   - `.eslintrc.js`
   - `.prettierrc`
   - `.eslintignore` / `.prettierignore`
 
-- [ ] **1.1.5** Git 配置
+- [x] **1.1.5** Git 配置 ✅ 2026-03-14
   - `.gitignore`
   - `.gitattributes`
 

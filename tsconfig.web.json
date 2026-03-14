@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./apps/web/src/*"],
+      "@ai-engine/core": ["packages/core/src"],
+      "@ai-engine/providers": ["packages/providers/src"],
+      "@ai-engine/shared": ["packages/shared/src"]
+    }
+  },
+  "include": ["apps/web/src/**/*", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
