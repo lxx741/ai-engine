@@ -1,8 +1,9 @@
-import { ExecutionContext, Injectable, CanActivate } from '@nestjs/common';
+import { ExecutionContext, Injectable, CanActivate, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 
-export const Public = () => Reflect.set('isPublic', true);
+export const IS_PUBLIC_KEY = 'isPublic';
+export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
@@ -12,7 +13,7 @@ export class ApiKeyGuard implements CanActivate {
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);

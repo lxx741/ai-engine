@@ -1,7 +1,7 @@
 services:
-  # PostgreSQL with pgvector extension
+  # PostgreSQL (pgvector extension can be added later)
   postgres:
-    image: pgvector/pgvector:pg16
+    image: postgres:16
     container_name: ai-engine-postgres
     restart: unless-stopped
     environment:
