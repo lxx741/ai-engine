@@ -1,18 +1,7 @@
 /**
- * Generate a random API key
+ * 服务端工具函数导出
  */
-export function generateApiKey(): string {
-  return `sk_${randomString(32)}`;
-}
 
-/**
- * Generate a random string
- */
-export function randomString(length: number): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
+export * from './api-key.util';
+export * from './template.util';
+export * from './common.util';

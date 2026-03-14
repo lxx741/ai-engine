@@ -21,10 +21,10 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@ai-engine/shared": ["packages/shared/src"],
       "@ai-engine/core": ["packages/core/src"],
-      "@ai-engine/providers": ["packages/providers/src"],
-      "@ai-engine/shared": ["packages/shared/src"]
+      "@ai-engine/providers": ["packages/providers/src"]
     }
   },
-  "exclude": ["node_modules", "dist", "build", ".next"]
+  "exclude": ["node_modules", "dist", "build", ".next", "apps"]
 }
