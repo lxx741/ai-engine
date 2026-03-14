@@ -687,131 +687,27 @@ ai-engine/
 
 ## 开发进度记录
 
-### 开始日期：2026-03-14
-
-### 阶段完成情况
-
-#### 阶段 1：项目初始化 ✅
-- 开始日期：2026-03-14
-- 完成日期：2026-03-14
-- 实际耗时：1 天
-- 备注：Monorepo 架构、Docker 环境、NestJS 后端、Next.js 前端、共享包全部完成。**开发环境已成功启动验证**：
-  - 后端：http://localhost:3000 (Swagger: /docs)
-  - 前端：http://localhost:3001
-  - PostgreSQL: localhost:5432
-  - Redis: localhost:6379
-
-#### 阶段 2：应用管理模块 ✅
-- 开始日期：2026-03-14
-- 完成日期：2026-03-14
-- 实际耗时：1 天（含 Monorepo 重构 40 分钟）
-- 备注：
-  - ✅ 应用管理 API 完成（CRUD + API Key 认证）
-  - ✅ 模型管理 API 完成（CRUD + 默认模型）
-  - ✅ Prisma 重构完成（移至 apps/server/prisma/）
-  - ✅ TypeScript 编译 0 错误
-  - ✅ 服务正常运行
-  - ⏳ 前端界面待开发
-
-#### 阶段 3：对话引擎
-- 开始日期：____-__-__
-- 完成日期：____-__-__
-- 实际耗时：__ 天
-- 备注：
-
-#### 阶段 4：工作流引擎
-- 开始日期：____-__-__
-- 完成日期：____-__-__
-- 实际耗时：__ 天
-- 备注：
-
-#### 阶段 5：工具系统
-- 开始日期：____-__-__
-- 完成日期：____-__-__
-- 实际耗时：__ 天
-- 备注：
-
-#### 阶段 6：完善优化
-- 开始日期：____-__-__
-- 完成日期：____-__-__
-- 实际耗时：__ 天
-- 备注：
-
-#### 阶段 7：测试与部署
-- 开始日期：____-__-__
-- 完成日期：____-__-__
-- 实际耗时：__ 天
-- 备注：
+| 阶段 | 开始日期 | 结束日期 | 状态 |
+|------|----------|----------|------|
+| 1. 项目初始化 | 2026-03-14 | 2026-03-14 | ✅ 完成 |
+| 2. 应用管理 | 2026-03-14 | 2026-03-14 | ✅ 完成（后端） |
+| 3. 对话引擎 | - | - | ⏳ 待开始 |
+| 4. 工作流引擎 | - | - | ⏳ 待开始 |
+| 5. 工具系统 | - | - | ⏳ 待开始 |
+| 6. 完善优化 | - | - | ⏳ 待开始 |
+| 7. 测试与部署 | - | - | ⏳ 待开始 |
 
 ---
 
-## Monorepo 重构记录
+## 相关文档
 
-### 重构日期：2026-03-14
-### 重构目标：解决 Prisma 与 pnpm workspace 兼容性问题
-### 重构耗时：40 分钟
-### 重构成果：
-- ✅ Prisma 移至 `apps/server/prisma/`
-- ✅ packages/shared 精简为仅类型定义
-- ✅ 工具函数移至 `apps/server/src/common/utils/`
-- ✅ TypeScript 路径映射优化
-- ✅ Prisma Client 生成成功
-- ✅ 0 编译错误
-
-### 关键变更：
-- 导入路径：`@ai-engine/shared/utils` → `@/common/utils`
-- Prisma 路径：`/prisma` → `/apps/server/prisma`
-- 新增路径映射：`@/*` → `./src/*`
-
-详见：[docs/RESTRUCTURE-PLAN.md](./RESTRUCTURE-PLAN.md)
-
----
-
-## 备注与问题记录
-
-### 技术问题
-- 无（所有问题已解决）
-
-### 设计变更
-- ✅ Monorepo 重构完成（2026-03-14）
-- ✅ Prisma 移至服务层
-- ✅ packages/shared 精简为仅类型定义
-
-### 待决策事项
-- 前端 UI 开发优先级
-- LLM 提供商接入顺序（阿里云 vs Ollama）
-- 工作流引擎实现方案
-
-### 当前服务状态（2026-03-14 21:12）
-- ✅ **NestJS 后端**: http://localhost:3000
-- ✅ **Swagger 文档**: http://localhost:3000/docs
-- ✅ **PostgreSQL**: localhost:5432 (healthy)
-- ✅ **Redis**: localhost:6379 (healthy)
-
-### 已验证的 API
-```bash
-# 健康检查
-curl http://localhost:3000/api/health
-
-# 获取默认模型
-curl http://localhost:3000/api/models/default/active
-
-# 获取模型列表
-curl http://localhost:3000/api/models
-
-# 创建应用
-curl -X POST http://localhost:3000/api/apps \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: test-key" \
-  -d '{"name":"测试应用","description":"测试描述"}'
-
-# 获取应用列表
-curl http://localhost:3000/api/apps \
-  -H "X-API-Key: test-key"
-``` 
+- [CHANGELOG.md](./CHANGELOG.md) - 项目变更日志
+- [PROJECT-STATUS.md](./PROJECT-STATUS.md) - 项目状态详情
+- [API-TESTING.md](./API-TESTING.md) - API 测试记录
+- [RESTRUCTURE-PLAN.md](./RESTRUCTURE-PLAN.md) - Monorepo 重构计划
 
 ---
 
 > 文档版本：v1.0  
 > 最后更新：2026-03-14  
-> 维护方式：每完成一项任务，更新对应复选框状态 `[ ]` → `[x]`，并记录完成日期
+> 维护方式：每完成一项任务，更新对应复选框状态 `[ ]` → `[x]`
