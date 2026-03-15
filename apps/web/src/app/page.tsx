@@ -5,7 +5,7 @@ export default function Home() {
       <p className="text-xl text-muted-foreground">
         Enterprise AI Application Platform
       </p>
-      <div className="mt-8 flex gap-4">
+      <div className="mt-8 flex gap-4 flex-wrap justify-center">
         <a
           href="/apps"
           className="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
@@ -13,10 +13,22 @@ export default function Home() {
           应用管理
         </a>
         <a
+          href="/chat"
+          className="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+        >
+          对话功能
+        </a>
+        <a
           href="/workflows"
           className="px-6 py-3 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
         >
           工作流管理
+        </a>
+        <a
+          href="/tools"
+          className="px-6 py-3 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
+        >
+          工具管理
         </a>
         <a
           href="http://localhost:3000/docs"
