@@ -10,7 +10,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@ai-engine/shared": "workspace:*"
+    "@ai-engine/shared": "workspace:*",
+    "@ai-engine/providers": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

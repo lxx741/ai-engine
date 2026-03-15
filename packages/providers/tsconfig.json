@@ -19,6 +19,7 @@
     "strictPropertyInitialization": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "types": ["node"]

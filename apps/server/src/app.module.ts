@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { AppModule as ApplicationModule } from './modules/app/app.module';
 import { ModelModule } from './modules/model/model.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { WorkflowModule } from './modules/workflow/workflow.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ChatModule } from './modules/chat/chat.module';
     ApplicationModule,
     ModelModule,
     ChatModule,
+    WorkflowModule,
   ],
   controllers: [AppController],
   providers: [AppService],

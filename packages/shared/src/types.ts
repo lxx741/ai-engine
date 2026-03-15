@@ -60,36 +60,142 @@ export interface ChatCompletionChunk {
   }
 }
 
-export interface WorkflowNodeConfig {
+// ============================================
+// Workflow Engine Types
+// ============================================
+
+/**
+ * Workflow node type
+ */
+export type WorkflowNodeType =
+  | 'start'
+  | 'llm'
+  | 'http'
+  | 'condition'
+  | 'end'
+
+/**
+ * Workflow node configuration
+ */
+export interface WorkflowNode {
   id: string
-  type: string
+  type: WorkflowNodeType
   name: string
-  config: Record<string, any>
+  description?: string
+  config: NodeConfig
+  position?: {
+    x: number
+    y: number
+  }
 }
 
-export interface WorkflowEdgeConfig {
+/**
+ * Node configuration by type
+ */
+export interface NodeConfig {
+  // Common config
+  timeout?: number
+  retries?: number
+
+  // LLM node config
+  modelId?: string
+  prompt?: string
+  temperature?: number
+  maxTokens?: number
+
+  // HTTP node config
+  url?: string
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  headers?: Record<string, string>
+  body?: string
+
+  // Condition node config
+  expression?: string
+
+  // Start/End node config
+  variables?: Record<string, any>
+  [key: string]: any
+}
+
+/**
+ * Workflow edge (connection between nodes)
+ */
+export interface WorkflowEdge {
   id: string
   source: string
   target: string
   condition?: string
+  label?: string
 }
 
+/**
+ * Workflow definition (DAG)
+ */
 export interface WorkflowDefinition {
-  nodes: WorkflowNodeConfig[]
-  edges: WorkflowEdgeConfig[]
+  nodes: WorkflowNode[]
+  edges: WorkflowEdge[]
   variables?: Record<string, any>
+  metadata?: {
+    version?: string
+    author?: string
+    description?: string
+  }
 }
 
-export enum WorkflowStatus {
-  DRAFT = 'draft',
-  PUBLISHED = 'published',
-  ARCHIVED = 'archived',
+/**
+ * Workflow execution status
+ */
+export type WorkflowStatus =
+  | 'draft'
+  | 'published'
+  | 'archived'
+
+/**
+ * Workflow run status
+ */
+export type WorkflowRunStatus =
+  | 'pending'
+  | 'running'
+  | 'success'
+  | 'failed'
+  | 'cancelled'
+
+/**
+ * Workflow execution context
+ */
+export interface WorkflowExecutionContext {
+  workflowId: string
+  runId: string
+  variables: Record<string, any>
+  nodeOutputs: Record<string, any>
+  currentNodeId?: string
+  startTime: Date
+  endTime?: Date
 }
 
-export enum RunStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  SUCCESS = 'success',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
+/**
+ * Node execution result
+ */
+export interface NodeExecutionResult {
+  nodeId: string
+  success: boolean
+  output?: any
+  error?: string
+  duration?: number
+  timestamp: Date
+}
+
+/**
+ * Workflow execution result
+ */
+export interface WorkflowExecutionResult {
+  runId: string
+  workflowId: string
+  status: WorkflowRunStatus
+  output?: any
+  error?: string
+  nodeResults: NodeExecutionResult[]
+  duration: number
+  startTime: Date
+  endTime: Date
 }

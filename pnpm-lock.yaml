@@ -215,6 +215,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@ai-engine/providers':
+        specifier: workspace:*
+        version: link:../providers
       '@ai-engine/shared':
         specifier: workspace:*
         version: link:../shared

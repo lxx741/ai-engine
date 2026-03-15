@@ -50,32 +50,77 @@ export interface ChatCompletionChunk {
         totalTokens: number;
     };
 }
-export interface WorkflowNodeConfig {
+export type WorkflowNodeType = 'start' | 'llm' | 'http' | 'condition' | 'end';
+export interface WorkflowNode {
     id: string;
-    type: string;
+    type: WorkflowNodeType;
     name: string;
-    config: Record<string, any>;
+    description?: string;
+    config: NodeConfig;
+    position?: {
+        x: number;
+        y: number;
+    };
 }
-export interface WorkflowEdgeConfig {
+export interface NodeConfig {
+    timeout?: number;
+    retries?: number;
+    modelId?: string;
+    prompt?: string;
+    temperature?: number;
+    maxTokens?: number;
+    url?: string;
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    headers?: Record<string, string>;
+    body?: string;
+    expression?: string;
+    variables?: Record<string, any>;
+    [key: string]: any;
+}
+export interface WorkflowEdge {
     id: string;
     source: string;
     target: string;
     condition?: string;
+    label?: string;
 }
 export interface WorkflowDefinition {
-    nodes: WorkflowNodeConfig[];
-    edges: WorkflowEdgeConfig[];
+    nodes: WorkflowNode[];
+    edges: WorkflowEdge[];
     variables?: Record<string, any>;
+    metadata?: {
+        version?: string;
+        author?: string;
+        description?: string;
+    };
 }
-export declare enum WorkflowStatus {
-    DRAFT = "draft",
-    PUBLISHED = "published",
-    ARCHIVED = "archived"
+export type WorkflowStatus = 'draft' | 'published' | 'archived';
+export type WorkflowRunStatus = 'pending' | 'running' | 'success' | 'failed' | 'cancelled';
+export interface WorkflowExecutionContext {
+    workflowId: string;
+    runId: string;
+    variables: Record<string, any>;
+    nodeOutputs: Record<string, any>;
+    currentNodeId?: string;
+    startTime: Date;
+    endTime?: Date;
 }
-export declare enum RunStatus {
-    PENDING = "pending",
-    RUNNING = "running",
-    SUCCESS = "success",
-    FAILED = "failed",
-    CANCELLED = "cancelled"
+export interface NodeExecutionResult {
+    nodeId: string;
+    success: boolean;
+    output?: any;
+    error?: string;
+    duration?: number;
+    timestamp: Date;
+}
+export interface WorkflowExecutionResult {
+    runId: string;
+    workflowId: string;
+    status: WorkflowRunStatus;
+    output?: any;
+    error?: string;
+    nodeResults: NodeExecutionResult[];
+    duration: number;
+    startTime: Date;
+    endTime: Date;
 }

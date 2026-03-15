@@ -711,3 +711,36 @@ ai-engine/
 > 文档版本：v1.0  
 > 最后更新：2026-03-14  
 > 维护方式：每完成一项任务，更新对应复选框状态 `[ ]` → `[x]`
+
+---
+
+## 阶段 3 完成记录 (2026-03-15)
+
+### 完成内容
+- ✅ Ollama 本地模型集成（qwen3.5:9b）
+- ✅ 对话 API 实现（非流式）
+- ✅ 会话管理功能
+- ✅ 前端应用管理页面（/apps, /apps/new, /apps/[id]）
+- ✅ API Key 复制功能
+- ✅ 应用删除功能
+
+### 服务状态
+- 后端：http://localhost:3000 ✅
+- 前端：http://localhost:3001 ✅
+- Ollama: http://localhost:11434 ✅
+
+### 已知问题
+- Ollama qwen3.5:9b 响应时间约 30-40 秒（模型较大）
+- SSE 流式响应需要修复（Observable 返回类型）
+
+### 测试方法
+```bash
+# 访问前端
+http://localhost:3001/apps
+
+# 测试对话 API
+curl -X POST http://localhost:3000/api/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -d '{"conversationId":"SESSION_ID","message":"你好"}'
+```
