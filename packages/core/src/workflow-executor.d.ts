@@ -10,6 +10,7 @@ export interface ExecutionContext {
     nodeOutputs: Record<string, any>;
     startTime: Date;
     currentNodeId?: string;
+    apiKey?: string;
 }
 export interface NodeExecuteResult {
     success: boolean;

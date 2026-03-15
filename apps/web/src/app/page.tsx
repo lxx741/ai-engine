@@ -10,7 +10,13 @@ export default function Home() {
           href="/apps"
           className="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
         >
-          Get Started
+          应用管理
+        </a>
+        <a
+          href="/workflows"
+          className="px-6 py-3 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
+        >
+          工作流管理
         </a>
         <a
           href="http://localhost:3000/docs"

@@ -19,6 +19,7 @@ class WorkflowExecutor {
         this.registerNodeExecutor(new node_executors_1.HTTPNodeExecutor());
         this.registerNodeExecutor(new node_executors_1.ConditionNodeExecutor());
         this.registerNodeExecutor(new node_executors_1.EndNodeExecutor());
+        this.registerNodeExecutor(new node_executors_1.ToolNodeExecutor());
     }
     registerNodeExecutor(executor) {
         const nodeType = this.getNodeTypeFromExecutor(executor);
@@ -170,6 +171,8 @@ class WorkflowExecutor {
             return 'condition';
         if (className.includes('End'))
             return 'end';
+        if (className.includes('Tool'))
+            return 'tool';
         return 'unknown';
     }
 }

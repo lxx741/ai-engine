@@ -7,6 +7,7 @@ import {
   HTTPNodeExecutor,
   ConditionNodeExecutor,
   EndNodeExecutor,
+  ToolNodeExecutor,
 } from './node-executors'
 
 export interface WorkflowExecutorConfig {
@@ -21,6 +22,7 @@ export interface ExecutionContext {
   nodeOutputs: Record<string, any>
   startTime: Date
   currentNodeId?: string
+  apiKey?: string
 }
 
 export interface NodeExecuteResult {
@@ -99,6 +101,7 @@ export class WorkflowExecutor implements IWorkflowExecutor {
     this.registerNodeExecutor(new HTTPNodeExecutor())
     this.registerNodeExecutor(new ConditionNodeExecutor())
     this.registerNodeExecutor(new EndNodeExecutor())
+    this.registerNodeExecutor(new ToolNodeExecutor())
   }
 
   /**
@@ -339,6 +342,7 @@ export class WorkflowExecutor implements IWorkflowExecutor {
     if (className.includes('HTTP')) return 'http'
     if (className.includes('Condition')) return 'condition'
     if (className.includes('End')) return 'end'
+    if (className.includes('Tool')) return 'tool'
     return 'unknown'
   }
 }

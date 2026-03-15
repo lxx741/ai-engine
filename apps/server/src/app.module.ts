@@ -9,6 +9,7 @@ import { AppModule as ApplicationModule } from './modules/app/app.module';
 import { ModelModule } from './modules/model/model.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
+import { ToolModule } from './modules/tool/tool.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
     ModelModule,
     ChatModule,
     WorkflowModule,
+    ToolModule,
   ],
   controllers: [AppController],
   providers: [AppService],
