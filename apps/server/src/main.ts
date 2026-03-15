@@ -1,3 +1,8 @@
+// Load environment variables from .env.local before any imports
+if (process.env.NODE_ENV === 'development') {
+  require('dotenv').config({ path: '.env.local' });
+}
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';

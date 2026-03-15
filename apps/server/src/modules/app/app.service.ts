@@ -10,9 +10,15 @@ export class AppService {
   async create(createAppDto: CreateAppDto) {
     const apiKey = generateApiKey();
     
+    // Get default model (prefer Ollama if available)
+    const defaultModel = await this.prisma.model.findFirst({
+      where: { enabled: true, isDefault: true },
+    });
+    
     return this.prisma.app.create({
       data: {
         ...createAppDto,
+        modelId: createAppDto.modelId || defaultModel?.id || 'ollama:qwen3.5:9b',
         apiKey,
         config: createAppDto.config || {},
       },

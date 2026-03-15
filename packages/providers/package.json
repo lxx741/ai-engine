@@ -6,7 +6,11 @@
   "types": "./src/index.ts",
   "scripts": {
     "lint": "eslint src/**/*.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run integration.test.ts"
   },
   "dependencies": {
     "@ai-engine/shared": "workspace:*",
@@ -14,6 +18,8 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^1.3.0",
+    "@vitest/coverage-v8": "^1.3.0"
   }
 }

@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_URL = process.env.API_URL || 'http://localhost:3000/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -12,7 +12,7 @@ export const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    const apiKey = localStorage.getItem('api_key')
+    const apiKey = localStorage.getItem('api_key') || 'test-key'
     if (apiKey) {
       config.headers['X-API-Key'] = apiKey
     }
