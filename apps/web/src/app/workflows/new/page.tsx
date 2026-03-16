@@ -13,11 +13,15 @@ export default function NewWorkflowPage() {
 
   const handleSubmit = async (data: any) => {
     try {
+      console.log('Creating workflow with data:', JSON.stringify(data, null, 2))
       const workflow = await createWorkflow.mutateAsync(data)
+      console.log('Workflow created:', workflow.id)
       router.push(`/workflows/${workflow.id}/edit`)
-    } catch (error) {
+    } catch (error: any) {
       console.error('创建工作流失败:', error)
-      alert('创建工作流失败，请重试')
+      console.error('Error response:', error.response?.data)
+      console.error('Error status:', error.response?.status)
+      alert(`创建工作流失败：${error.response?.data?.message || error.message || '请重试'}`)
     }
   }
 

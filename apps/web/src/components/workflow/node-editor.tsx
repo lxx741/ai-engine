@@ -19,6 +19,7 @@ interface NodeEditorProps {
   onDeleteNode: (nodeId: string) => void
   onAddEdge: (edge: Omit<WorkflowEdge, 'id'>) => void
   onDeleteEdge: (edgeId: string) => void
+  onMoveNode?: (index: number, direction: 'up' | 'down') => void
 }
 
 export function NodeEditor({
@@ -29,6 +30,7 @@ export function NodeEditor({
   onDeleteNode,
   onAddEdge,
   onDeleteEdge,
+  onMoveNode,
 }: NodeEditorProps) {
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null)
   const [edgeSource, setEdgeSource] = useState<string>('')
@@ -39,20 +41,20 @@ export function NodeEditor({
     { type: 'http', label: 'HTTP', color: 'bg-purple-500' },
     { type: 'condition', label: '条件', color: 'bg-yellow-500' },
     { type: 'end', label: '结束', color: 'bg-red-500' },
+    { type: 'tool', label: '工具', color: 'bg-orange-500' },
   ]
 
   const handleNodeConfigChange = (key: string, value: any) => {
     if (!selectedNode) return
-    onUpdateNode(selectedNode.id, {
+    const newConfig = {
       ...selectedNode.config,
       [key]: value,
-    })
+    }
+    console.log('Updating node config:', selectedNode.id, newConfig)
+    onUpdateNode(selectedNode.id, newConfig)
     setSelectedNode({
       ...selectedNode,
-      config: {
-        ...selectedNode.config,
-        [key]: value,
-      },
+      config: newConfig,
     })
   }
 
@@ -67,9 +69,14 @@ export function NodeEditor({
             {nodeTypes.map(({ type, label, color }) => (
               <Button
                 key={type}
+                type="button"
                 variant="outline"
                 className="justify-start"
-                onClick={() => onAddNode(type)}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onAddNode(type)
+                }}
               >
                 <span className={`w-2 h-2 rounded-full ${color} mr-2`} />
                 {label}
@@ -85,7 +92,12 @@ export function NodeEditor({
                 className={`flex items-center justify-between p-2 rounded-md border cursor-pointer ${
                   selectedNode?.id === node.id ? 'bg-muted' : ''
                 }`}
-                onClick={() => setSelectedNode(node)}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  console.log('Selecting node:', node.id, node.config)
+                  setSelectedNode(node)
+                }}
               >
                 <div className="flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${
@@ -95,14 +107,15 @@ export function NodeEditor({
                 </div>
                 <div className="flex gap-1">
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6"
                     onClick={(e) => {
+                      e.preventDefault()
                       e.stopPropagation()
-                      if (index > 0) {
-                        const newNodes = [...nodes]
-                        ;[newNodes[index - 1], newNodes[index]] = [newNodes[index], newNodes[index - 1]]
+                      if (index > 0 && onMoveNode) {
+                        onMoveNode(index, 'up')
                       }
                     }}
                     disabled={index === 0}
@@ -110,14 +123,15 @@ export function NodeEditor({
                     <MoveUp className="h-3 w-3" />
                   </Button>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6"
                     onClick={(e) => {
+                      e.preventDefault()
                       e.stopPropagation()
-                      if (index < nodes.length - 1) {
-                        const newNodes = [...nodes]
-                        ;[newNodes[index], newNodes[index + 1]] = [newNodes[index + 1], newNodes[index]]
+                      if (index < nodes.length - 1 && onMoveNode) {
+                        onMoveNode(index, 'down')
                       }
                     }}
                     disabled={index === nodes.length - 1}
@@ -125,10 +139,12 @@ export function NodeEditor({
                     <MoveDown className="h-3 w-3" />
                   </Button>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 text-destructive"
                     onClick={(e) => {
+                      e.preventDefault()
                       e.stopPropagation()
                       onDeleteNode(node.id)
                       if (selectedNode?.id === node.id) setSelectedNode(null)
@@ -153,14 +169,19 @@ export function NodeEditor({
                   {' -> '}
                   {nodes.find(n => n.id === edge.target)?.config.name || edge.target}
                 </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-destructive"
-                  onClick={() => onDeleteEdge(edge.id)}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-destructive"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        onDeleteEdge(edge.id)
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
               </div>
             ))}
           </div>
@@ -297,6 +318,111 @@ export function NodeEditor({
                     />
                   </div>
                 )}
+
+                {selectedNode.type === 'tool' && (
+                  <>
+                    <div className="space-y-2">
+                      <Label>选择工具</Label>
+                      <Select
+                        value={selectedNode.config.toolName || ''}
+                        onValueChange={(v) => handleNodeConfigChange('toolName', v)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="选择工具" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="http">HTTP 请求</SelectItem>
+                          <SelectItem value="code">代码执行</SelectItem>
+                          <SelectItem value="time">时间工具</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>节点名称</Label>
+                      <Input
+                        value={selectedNode.config.name || ''}
+                        onChange={(e) => handleNodeConfigChange('name', e.target.value)}
+                        placeholder="输入节点名称"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>工具参数</Label>
+                      <Textarea
+                        value={JSON.stringify(selectedNode.config.params, null, 2)}
+                        onChange={(e) => {
+                          try {
+                            handleNodeConfigChange('params', JSON.parse(e.target.value))
+                          } catch (e) {
+                            // 忽略 JSON 解析错误
+                          }
+                        }}
+                        placeholder='{"url": "https://api.example.com", "method": "GET"}'
+                        rows={8}
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        填写工具所需的参数（JSON 格式）
+                      </p>
+                    </div>
+
+                    {selectedNode.config.toolName && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-sm">工具说明</CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-sm space-y-2">
+                          {selectedNode.config.toolName === 'http' && (
+                            <div>
+                              <p className="font-semibold">HTTP 工具</p>
+                              <p>发送 HTTP/HTTPS 请求</p>
+                              <p className="mt-2 text-muted-foreground">
+                                参数示例：
+                                <pre className="bg-muted p-2 rounded mt-1 text-xs overflow-auto">
+                                  {`{
+  "url": "https://api.example.com",
+  "method": "GET",
+  "headers": {},
+  "body": {}
+}`}
+                                </pre>
+                              </p>
+                            </div>
+                          )}
+                          {selectedNode.config.toolName === 'code' && (
+                            <div>
+                              <p className="font-semibold">代码工具</p>
+                              <p>在安全沙箱中执行 JavaScript 代码</p>
+                              <p className="mt-2 text-muted-foreground">
+                                参数示例：
+                                <pre className="bg-muted p-2 rounded mt-1 text-xs overflow-auto">
+                                  {`{
+  "code": "const result = [1,2,3].map(x => x * 2); result"
+}`}
+                                </pre>
+                              </p>
+                            </div>
+                          )}
+                          {selectedNode.config.toolName === 'time' && (
+                            <div>
+                              <p className="font-semibold">时间工具</p>
+                              <p>获取、格式化、转换时间</p>
+                              <p className="mt-2 text-muted-foreground">
+                                参数示例：
+                                <pre className="bg-muted p-2 rounded mt-1 text-xs overflow-auto">
+                                  {`{
+  "action": "now",
+  "format": "yyyy-MM-dd HH:mm:ss"
+}`}
+                                </pre>
+                              </p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+                  </>
+                )}
               </TabsContent>
               <TabsContent value="edge" className="space-y-4 mt-4">
                 <div className="space-y-2">
@@ -317,6 +443,7 @@ export function NodeEditor({
                       </SelectContent>
                     </Select>
                     <Button
+                      type="button"
                       onClick={() => {
                         if (edgeSource) {
                           onAddEdge({
@@ -357,10 +484,15 @@ export function NodeEditor({
                             }}
                           />
                           <Button
+                            type="button"
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive"
-                            onClick={() => onDeleteEdge(edge.id)}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              onDeleteEdge(edge.id)
+                            }}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>

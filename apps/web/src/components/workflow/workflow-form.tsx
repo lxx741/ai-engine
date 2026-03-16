@@ -32,13 +32,35 @@ export function WorkflowForm({ workflow, apps, onSubmit, onCancel }: WorkflowFor
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({
-      appId,
+    
+    // Validate definition structure
+    const validDefinition = {
+      nodes: Array.isArray(definition.nodes) ? definition.nodes : [],
+      edges: Array.isArray(definition.edges) ? definition.edges : [],
+      variables: definition.variables || {},
+    }
+    
+    console.log('Submitting workflow:', {
       name,
       description,
       status,
-      definition,
+      definition: validDefinition,
     })
+    
+    // 创建工作流时需要 appId，更新时不需要
+    const submitData: any = {
+      name,
+      description,
+      status,
+      definition: validDefinition,
+    }
+    
+    // 如果是创建模式（没有 workflow prop），添加 appId
+    if (!workflow && appId) {
+      submitData.appId = appId
+    }
+    
+    onSubmit(submitData)
   }
 
   const handleAddNode = (type: WorkflowNode['type']) => {
@@ -68,6 +90,24 @@ export function WorkflowForm({ workflow, apps, onSubmit, onCancel }: WorkflowFor
       ...prev,
       nodes: prev.nodes.filter(node => node.id !== nodeId),
       edges: prev.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId),
+    }))
+  }
+
+  const handleMoveNode = (index: number, direction: 'up' | 'down') => {
+    setDefinition(prev => ({
+      ...prev,
+      nodes: prev.nodes.map((node, i) => {
+        if (direction === 'up' && i === index - 1) {
+          return prev.nodes[index]
+        }
+        if (direction === 'down' && i === index + 1) {
+          return prev.nodes[index]
+        }
+        if (i === index) {
+          return direction === 'up' ? prev.nodes[index - 1] : prev.nodes[index + 1]
+        }
+        return node
+      }),
     }))
   }
 
@@ -184,6 +224,7 @@ export function WorkflowForm({ workflow, apps, onSubmit, onCancel }: WorkflowFor
           onAddNode={handleAddNode}
           onUpdateNode={handleUpdateNode}
           onDeleteNode={handleDeleteNode}
+          onMoveNode={handleMoveNode}
           onAddEdge={handleAddEdge}
           onDeleteEdge={handleDeleteEdge}
         />
@@ -247,6 +288,12 @@ function getDefaultNodeConfig(type: WorkflowNode['type']): Record<string, any> {
       return {
         name: '结束节点',
         outputs: [{ name: 'result', value: '' }],
+      }
+    case 'tool':
+      return {
+        name: '工具节点',
+        toolName: '',
+        params: {},
       }
     default:
       return { name: '未命名节点' }

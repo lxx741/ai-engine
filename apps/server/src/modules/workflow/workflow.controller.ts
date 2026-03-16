@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { WorkflowService } from './workflow.service';
@@ -25,7 +26,13 @@ export class WorkflowController {
   @ApiOperation({ summary: '创建工作流' })
   @ApiResponse({ status: 201, description: '工作流创建成功' })
   create(@Body() createWorkflowDto: CreateWorkflowDto) {
-    return this.workflowService.create(createWorkflowDto);
+    try {
+      console.log('Create workflow:', JSON.stringify(createWorkflowDto, null, 2));
+      return this.workflowService.create(createWorkflowDto);
+    } catch (error) {
+      console.error('Create workflow error:', error);
+      throw error;
+    }
   }
 
   @Get()
@@ -52,7 +59,24 @@ export class WorkflowController {
     @Param('id') id: string,
     @Body() updateWorkflowDto: UpdateWorkflowDto,
   ) {
-    return this.workflowService.update(id, updateWorkflowDto);
+    try {
+      console.log('Update workflow:', id);
+      console.log('Request body:', JSON.stringify(updateWorkflowDto, null, 2));
+      
+      // Validate definition if provided
+      if (updateWorkflowDto.definition) {
+        console.log('Definition nodes:', updateWorkflowDto.definition.nodes?.length);
+        console.log('Definition edges:', updateWorkflowDto.definition.edges?.length);
+      }
+      
+      return this.workflowService.update(id, updateWorkflowDto);
+    } catch (error) {
+      console.error('Update workflow error:', error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw error;
+    }
   }
 
   @Delete(':id')

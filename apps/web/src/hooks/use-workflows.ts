@@ -3,7 +3,7 @@ import { api } from '@/lib/api'
 
 export interface WorkflowNode {
   id: string
-  type: 'start' | 'llm' | 'http' | 'condition' | 'end'
+  type: 'start' | 'llm' | 'http' | 'condition' | 'end' | 'tool'
   config: Record<string, any>
   position?: {
     x: number

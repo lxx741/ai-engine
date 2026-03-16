@@ -17,11 +17,14 @@ export default function EditWorkflowPage() {
 
   const handleSubmit = async (data: any) => {
     try {
+      console.log('Submitting workflow update:', JSON.stringify(data, null, 2))
       await updateWorkflow.mutateAsync({ id: workflowId, data })
       router.push('/workflows')
-    } catch (error) {
+    } catch (error: any) {
       console.error('更新工作流失败:', error)
-      alert('更新工作流失败，请重试')
+      console.error('Error response:', error.response?.data)
+      console.error('Error status:', error.response?.status)
+      alert(`更新工作流失败：${error.response?.data?.message || error.message || '未知错误'}`)
     }
   }
 

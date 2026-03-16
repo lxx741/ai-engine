@@ -20,6 +20,7 @@ export default function RunWorkflowPage() {
   
   const [input, setInput] = useState<Record<string, any>>({})
   const [isRunning, setIsRunning] = useState(false)
+  const [expandedRunId, setExpandedRunId] = useState<string | null>(null)
   
   const { data: workflow, isLoading } = useWorkflow(workflowId)
   const runWorkflow = useRunWorkflow()
@@ -43,6 +44,10 @@ export default function RunWorkflowPage() {
 
   const handleInputChange = (key: string, value: string) => {
     setInput(prev => ({ ...prev, [key]: value }))
+  }
+
+  const toggleExpand = (runId: string) => {
+    setExpandedRunId(expandedRunId === runId ? null : runId)
   }
 
   if (isLoading) {
@@ -225,34 +230,73 @@ export default function RunWorkflowPage() {
               {runs && runs.length > 0 ? (
                 <div className="space-y-4">
                   {runs.map((run) => (
-                    <div
-                      key={run.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-4">
-                        {run.status === 'success' ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                        ) : run.status === 'failed' ? (
-                          <XCircle className="h-5 w-5 text-red-500" />
-                        ) : (
-                          <Clock className="h-5 w-5 text-yellow-500" />
-                        )}
-                        <div>
-                          <p className="font-medium">
-                            {new Date(run.createdAt).toLocaleString('zh-CN')}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            耗时：{run.duration || '-'}ms
-                          </p>
+                    <div key={run.id} className="space-y-4">
+                      {/* 历史记录行 */}
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-4">
+                          {run.status === 'success' ? (
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          ) : run.status === 'failed' ? (
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          ) : (
+                            <Clock className="h-5 w-5 text-yellow-500" />
+                          )}
+                          <div>
+                            <p className="font-medium">
+                              {new Date(run.createdAt).toLocaleString('zh-CN')}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              耗时：{run.duration || '-'}ms
+                            </p>
+                          </div>
                         </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleExpand(run.id)}
+                        >
+                          {expandedRunId === run.id ? '收起' : '查看结果'}
+                        </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setLastRun(run)}
-                      >
-                        查看结果
-                      </Button>
+                      
+                      {/* 展开的结果区域 */}
+                      {expandedRunId === run.id && (
+                        <div className="ml-12 p-4 bg-muted rounded-lg space-y-3">
+                          {/* 输入参数 */}
+                          {run.input && Object.keys(run.input).length > 0 && (
+                            <div className="space-y-2">
+                              <Label>输入参数</Label>
+                              <pre className="bg-background p-3 rounded-md overflow-auto text-sm max-h-[200px]">
+                                {JSON.stringify(run.input, null, 2)}
+                              </pre>
+                            </div>
+                          )}
+                          
+                          {/* 输出结果 */}
+                          {run.output && (
+                            <div className="space-y-2">
+                              <Label>输出结果</Label>
+                              <pre className="bg-background p-3 rounded-md overflow-auto text-sm max-h-[300px]">
+                                {JSON.stringify(run.output, null, 2)}
+                              </pre>
+                            </div>
+                          )}
+                          
+                          {/* 错误信息 */}
+                          {run.error && (
+                            <div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm">
+                              {run.error}
+                            </div>
+                          )}
+                          
+                          {/* 无结果提示 */}
+                          {!run.output && !run.error && run.status === 'success' && (
+                            <div className="text-sm text-muted-foreground">
+                              执行成功，无输出结果
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
