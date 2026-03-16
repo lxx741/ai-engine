@@ -1,35 +1,37 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { ConversationService } from './conversation.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 describe('ConversationService', () => {
   let conversationService: ConversationService;
+  let mockPrismaService: any;
 
-  const mockPrismaService = {
-    $transaction: jest.fn((fn) => fn(mockPrismaService)),
-    conversation: {
-      create: jest.fn(),
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-    },
-    message: {
-      findMany: jest.fn(),
-      count: jest.fn(),
-    },
-  };
+  beforeEach(() => {
+    mockPrismaService = {
+      $transaction: vi.fn(async (operations: any[]) => {
+        const results = [];
+        for (const op of operations) {
+          results.push(await op);
+        }
+        return results;
+      }),
+      conversation: {
+        create: vi.fn(),
+        findUnique: vi.fn(),
+        findMany: vi.fn(),
+        delete: vi.fn(),
+        count: vi.fn(),
+      },
+      message: {
+        findMany: vi.fn(),
+        count: vi.fn(),
+      },
+    };
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ConversationService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
-    }).compile();
-
-    conversationService = module.get<ConversationService>(ConversationService);
+    // 直接实例化服务，传入 mock 的 PrismaService
+    conversationService = new ConversationService(mockPrismaService as PrismaService);
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -45,7 +47,10 @@ describe('ConversationService', () => {
 
       mockPrismaService.conversation.create.mockResolvedValue({
         id: 'conv-123',
-        ...createDto,
+        appId: createDto.appId,
+        metadata: createDto.metadata,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       const result = await conversationService.create(createDto);
@@ -64,6 +69,9 @@ describe('ConversationService', () => {
         id: 'conv-123',
         appId: 'app-123',
         metadata: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        app: { id: 'app-123', modelId: 'qwen-turbo' },
       };
 
       mockPrismaService.conversation.findUnique.mockResolvedValue(conversation);
@@ -85,8 +93,8 @@ describe('ConversationService', () => {
   describe('findByApp', () => {
     it('should return paginated conversations', async () => {
       const conversations = [
-        { id: 'conv-1', appId: 'app-123' },
-        { id: 'conv-2', appId: 'app-123' },
+        { id: 'conv-1', appId: 'app-123', createdAt: new Date(), updatedAt: new Date() },
+        { id: 'conv-2', appId: 'app-123', createdAt: new Date(), updatedAt: new Date() },
       ];
 
       mockPrismaService.conversation.findMany.mockResolvedValue(conversations);
@@ -105,6 +113,9 @@ describe('ConversationService', () => {
     it('should delete a conversation', async () => {
       mockPrismaService.conversation.findUnique.mockResolvedValue({
         id: 'conv-123',
+        appId: 'app-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       mockPrismaService.conversation.delete.mockResolvedValue({});
 
@@ -120,8 +131,8 @@ describe('ConversationService', () => {
   describe('getHistory', () => {
     it('should return conversation history', async () => {
       const messages = [
-        { id: 'msg-1', role: 'user', content: 'Hello' },
-        { id: 'msg-2', role: 'assistant', content: 'Hi' },
+        { id: 'msg-1', role: 'user', content: 'Hello', createdAt: new Date(), updatedAt: new Date() },
+        { id: 'msg-2', role: 'assistant', content: 'Hi', createdAt: new Date(), updatedAt: new Date() },
       ];
 
       mockPrismaService.message.findMany.mockResolvedValue(messages);

@@ -262,11 +262,20 @@ describe('Integration Tests', () => {
 
   describe('Health Check Integration', () => {
     it('should check Aliyun provider health', async () => {
-      const result = await factory.healthCheck('aliyun')
+      // Temporarily remove API key for this test
+      const originalApiKey = process.env.ALIYUN_API_KEY
+      delete process.env.ALIYUN_API_KEY
+      
+      // Create new factory without API key
+      const factoryNoKey = new ProviderFactory()
+      const result = await factoryNoKey.healthCheck('aliyun')
       
       expect(result.provider).toBe('aliyun')
-      expect(result.healthy).toBe(false) // Will be false without API key
-      expect(result.error).toBeDefined()
+      expect(result.healthy).toBe(false)
+      expect(result.error).toBe('API key not configured')
+      
+      // Restore API key
+      if (originalApiKey) process.env.ALIYUN_API_KEY = originalApiKey
     })
 
     it('should check Ollama provider health', async () => {

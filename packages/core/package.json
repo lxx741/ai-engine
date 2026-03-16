@@ -7,14 +7,19 @@
   "scripts": {
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage"
   },
   "dependencies": {
-    "@ai-engine/shared": "workspace:*",
-    "@ai-engine/providers": "workspace:*"
+    "@ai-engine/providers": "workspace:*",
+    "@ai-engine/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
-    "typescript": "^5.4.0"
+    "@vitest/coverage-v8": "^1.6.1",
+    "typescript": "^5.4.0",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^1.6.1"
   }
 }

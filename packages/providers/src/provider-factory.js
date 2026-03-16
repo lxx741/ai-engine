@@ -127,13 +127,13 @@ class ProviderFactory {
         throw new Error(`No provider available for model: ${modelId}`);
     }
     getModelName(modelId) {
-        const colonMatch = modelId.match(/^([^:]+):(.+)$/);
         const slashMatch = modelId.match(/^([^/]+)\/(.+)$/);
-        if (colonMatch) {
-            return colonMatch[2];
-        }
         if (slashMatch) {
             return slashMatch[2];
+        }
+        const colonMatch = modelId.match(/^([^:]+):(.+)$/);
+        if (colonMatch) {
+            return colonMatch[2];
         }
         return modelId;
     }

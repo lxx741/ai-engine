@@ -230,16 +230,15 @@ export class ProviderFactory implements IProviderFactory {
    * Get model name from model ID
    */
   getModelName(modelId: string): string {
-    // Check slash format first (e.g., "ollama/llama2:7b" -> "llama2:7b")
-    const slashMatch = modelId.match(/^([^/]+)\/(.+)$/)
-    if (slashMatch) {
-      return slashMatch[2]
-    }
-
-    // Then check colon format (e.g., "aliyun:qwen-turbo" -> "qwen-turbo")
     const colonMatch = modelId.match(/^([^:]+):(.+)$/)
+    const slashMatch = modelId.match(/^([^/]+)\/(.+)$/)
+
     if (colonMatch) {
       return colonMatch[2]
+    }
+
+    if (slashMatch) {
+      return slashMatch[2]
     }
 
     return modelId

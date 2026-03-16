@@ -1,67 +1,91 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ChatService } from './chat.service';
 import { ConversationService } from './conversation.service';
 import { MessageService } from './message.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// 必须在 vi.mock 之前定义 mock 对象
+const mockProvider = {
+  name: 'aliyun',
+  chat: vi.fn(),
+  chatComplete: vi.fn(),
+};
+
+// Mock @ai-engine/providers - 必须在 import 之前
+vi.mock('@ai-engine/providers', async () => {
+  const actual = await vi.importActual('@ai-engine/providers');
+  return {
+    ...actual,
+    getProviderFactory: vi.fn(() => ({
+      getProviderForModel: vi.fn(() => mockProvider),
+      getModelName: vi.fn(() => 'qwen-turbo'),
+      createModelConfig: vi.fn(() => ({ apiKey: 'test-key' })),
+      healthCheck: vi.fn(),
+      healthCheckAll: vi.fn(),
+    })),
+  };
+});
 
 describe('ChatService', () => {
   let chatService: ChatService;
-  let conversationService: ConversationService;
-  let messageService: MessageService;
+  let mockPrismaService: any;
+  let mockConversationService: any;
+  let mockMessageService: any;
 
-  const mockPrismaService = {
-    $transaction: jest.fn((fn) => fn(mockPrismaService)),
-    message: {
-      create: jest.fn(),
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-    },
-    conversation: {
-      create: jest.fn(),
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-    },
-    app: {
-      findUnique: jest.fn(),
-    },
-  };
+  beforeEach(() => {
+    mockPrismaService = {
+      $transaction: vi.fn(async (operations: any[]) => {
+        const results = [];
+        for (const op of operations) {
+          results.push(await op);
+        }
+        return results;
+      }),
+      message: {
+        create: vi.fn(),
+        findMany: vi.fn(),
+        findUnique: vi.fn(),
+        delete: vi.fn(),
+        count: vi.fn(),
+      },
+      conversation: {
+        create: vi.fn(),
+        findUnique: vi.fn(),
+        findMany: vi.fn(),
+        delete: vi.fn(),
+        count: vi.fn(),
+      },
+      app: {
+        findUnique: vi.fn(),
+      },
+    };
 
-  const mockConversationService = {
-    findOne: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    findByApp: jest.fn(),
-    getHistory: jest.fn(),
-    getMessageCount: jest.fn(),
-  };
+    mockConversationService = {
+      findOne: vi.fn(),
+      create: vi.fn(),
+      delete: vi.fn(),
+      findByApp: vi.fn(),
+      getHistory: vi.fn(),
+      getMessageCount: vi.fn(),
+    };
 
-  const mockMessageService = {
-    save: jest.fn(),
-    saveBatch: jest.fn(),
-    findOne: jest.fn(),
-    findByConversation: jest.fn(),
-    getHistory: jest.fn(),
-    delete: jest.fn(),
-    countByConversation: jest.fn(),
-  };
+    mockMessageService = {
+      save: vi.fn(),
+      saveBatch: vi.fn(),
+      findOne: vi.fn(),
+      findByConversation: vi.fn(),
+      getHistory: vi.fn(),
+      delete: vi.fn(),
+      countByConversation: vi.fn(),
+    };
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ChatService,
-        { provide: PrismaService, useValue: mockPrismaService },
-        { provide: ConversationService, useValue: mockConversationService },
-        { provide: MessageService, useValue: mockMessageService },
-      ],
-    }).compile();
-
-    chatService = module.get<ChatService>(ChatService);
-    conversationService = module.get<ConversationService>(ConversationService);
-    messageService = module.get<MessageService>(MessageService);
+    // 直接实例化服务，传入 mock 的依赖
+    chatService = new ChatService(
+      mockPrismaService as PrismaService,
+      mockConversationService as ConversationService,
+      mockMessageService as MessageService,
+    );
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -76,18 +100,31 @@ describe('ChatService', () => {
 
       mockConversationService.findOne.mockResolvedValue({
         id: conversationId,
-        app: { modelId: 'qwen-turbo' },
+        app: { id: 'app-1', modelId: 'qwen-turbo' },
       });
 
       mockMessageService.getHistory.mockResolvedValue([]);
-      mockMessageService.save.mockResolvedValue({ id: 'msg-1', role: 'user', content: message });
+      mockMessageService.save
+        .mockResolvedValueOnce({ id: 'msg-1', role: 'user', content: message })
+        .mockResolvedValueOnce({ id: 'msg-2', role: 'assistant', content: 'Hi there' });
+
+      // Mock provider response
+      mockProvider.chatComplete.mockResolvedValue({
+        content: 'Hi there',
+        usage: {
+          promptTokens: 10,
+          completionTokens: 20,
+          totalTokens: 30,
+        },
+      });
 
       const result = await chatService.send(message, conversationId, userId);
 
-      expect(conversationService.findOne).toHaveBeenCalledWith(conversationId);
-      expect(messageService.getHistory).toHaveBeenCalledWith(conversationId, 10);
-      expect(messageService.save).toHaveBeenCalledTimes(2);
+      expect(mockConversationService.findOne).toHaveBeenCalledWith(conversationId);
+      expect(mockMessageService.getHistory).toHaveBeenCalledWith(conversationId, 10);
+      expect(mockMessageService.save).toHaveBeenCalledTimes(2);
       expect(result).toBeDefined();
+      expect(result.content).toBe('Hi there');
     });
   });
 
@@ -98,11 +135,20 @@ describe('ChatService', () => {
 
       mockConversationService.findOne.mockResolvedValue({
         id: conversationId,
-        app: { modelId: 'qwen-turbo' },
+        app: { id: 'app-1', modelId: 'qwen-turbo' },
       });
 
       mockMessageService.getHistory.mockResolvedValue([]);
       mockMessageService.save.mockResolvedValue({ id: 'msg-1', role: 'user', content: message });
+
+      // Mock provider stream - return an async generator
+      async function* mockStream() {
+        yield { content: 'Hi ', finishReason: null };
+        yield { content: 'there', finishReason: 'stop' };
+        yield { content: '', finishReason: 'stop', usage: { promptTokens: 10, completionTokens: 20, totalTokens: 30 } };
+      }
+
+      mockProvider.chat.mockReturnValue(mockStream());
 
       const stream = chatService.sendStream(message, conversationId);
       const chunks: any[] = [];
@@ -111,8 +157,9 @@ describe('ChatService', () => {
         chunks.push(chunk);
       }
 
-      expect(conversationService.findOne).toHaveBeenCalledWith(conversationId);
-      expect(messageService.save).toHaveBeenCalled();
+      expect(mockConversationService.findOne).toHaveBeenCalledWith(conversationId);
+      expect(mockMessageService.save).toHaveBeenCalled();
+      expect(chunks.length).toBeGreaterThan(0);
     });
   });
 

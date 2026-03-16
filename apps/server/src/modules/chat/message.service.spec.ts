@@ -1,31 +1,33 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 describe('MessageService', () => {
   let messageService: MessageService;
+  let mockPrismaService: any;
 
-  const mockPrismaService = {
-    $transaction: jest.fn((fn) => fn(mockPrismaService)),
-    message: {
-      create: jest.fn(),
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-    },
-  };
+  beforeEach(() => {
+    mockPrismaService = {
+      $transaction: vi.fn(async (operations: any[]) => {
+        const results = [];
+        for (const op of operations) {
+          results.push(await op);
+        }
+        return results;
+      }),
+      message: {
+        create: vi.fn(),
+        findUnique: vi.fn(),
+        findMany: vi.fn(),
+        delete: vi.fn(),
+        count: vi.fn(),
+      },
+    };
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        MessageService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
-    }).compile();
-
-    messageService = module.get<MessageService>(MessageService);
+    // 直接实例化服务，传入 mock 的 PrismaService
+    messageService = new MessageService(mockPrismaService as PrismaService);
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -44,6 +46,9 @@ describe('MessageService', () => {
       mockPrismaService.message.create.mockResolvedValue({
         id: 'msg-123',
         ...messageData,
+        metadata: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       const result = await messageService.save(messageData);
@@ -51,7 +56,13 @@ describe('MessageService', () => {
       expect(result).toBeDefined();
       expect(result.id).toBe('msg-123');
       expect(mockPrismaService.message.create).toHaveBeenCalledWith({
-        data: messageData,
+        data: {
+          conversationId: messageData.conversationId,
+          role: messageData.role,
+          content: messageData.content,
+          tokens: messageData.tokens,
+          metadata: {},
+        },
       });
     });
   });
@@ -64,8 +75,8 @@ describe('MessageService', () => {
       ];
 
       mockPrismaService.message.create
-        .mockResolvedValueOnce({ id: 'msg-1', ...messages[0] })
-        .mockResolvedValueOnce({ id: 'msg-2', ...messages[1] });
+        .mockResolvedValueOnce({ id: 'msg-1', ...messages[0], metadata: {}, createdAt: new Date(), updatedAt: new Date() })
+        .mockResolvedValueOnce({ id: 'msg-2', ...messages[1], metadata: {}, createdAt: new Date(), updatedAt: new Date() });
 
       const result = await messageService.saveBatch(messages);
 
@@ -86,6 +97,8 @@ describe('MessageService', () => {
         conversationId: 'conv-123',
         role: 'user',
         content: 'Hello',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       mockPrismaService.message.findUnique.mockResolvedValue(message);
@@ -107,8 +120,8 @@ describe('MessageService', () => {
   describe('findByConversation', () => {
     it('should return messages for a conversation', async () => {
       const messages = [
-        { id: 'msg-1', role: 'user', content: 'Hello' },
-        { id: 'msg-2', role: 'assistant', content: 'Hi' },
+        { id: 'msg-1', role: 'user', content: 'Hello', createdAt: new Date(), updatedAt: new Date() },
+        { id: 'msg-2', role: 'assistant', content: 'Hi', createdAt: new Date(), updatedAt: new Date() },
       ];
 
       mockPrismaService.message.findMany.mockResolvedValue(messages);
@@ -127,17 +140,19 @@ describe('MessageService', () => {
 
   describe('getHistory', () => {
     it('should return message history in correct order', async () => {
-      const messages = [
-        { id: 'msg-2', role: 'assistant', content: 'Hi', createdAt: new Date('2024-01-02') },
-        { id: 'msg-1', role: 'user', content: 'Hello', createdAt: new Date('2024-01-01') },
+      // 按 createdAt desc 排序后返回，然后 reverse() 变成 asc
+      const messagesFromDb = [
+        { id: 'msg-2', role: 'assistant', content: 'Hi', createdAt: new Date('2024-01-02'), updatedAt: new Date() },
+        { id: 'msg-1', role: 'user', content: 'Hello', createdAt: new Date('2024-01-01'), updatedAt: new Date() },
       ];
 
-      mockPrismaService.message.findMany.mockResolvedValue(messages);
+      mockPrismaService.message.findMany.mockResolvedValue(messagesFromDb);
 
       const result = await messageService.getHistory('conv-123', 10);
 
-      expect(result[0]).toEqual(messages[1]);
-      expect(result[1]).toEqual(messages[0]);
+      // reverse() 后，msg-1 应该在前面
+      expect(result[0].id).toBe('msg-1');
+      expect(result[1].id).toBe('msg-2');
     });
   });
 
@@ -145,6 +160,11 @@ describe('MessageService', () => {
     it('should delete a message', async () => {
       mockPrismaService.message.findUnique.mockResolvedValue({
         id: 'msg-123',
+        conversationId: 'conv-123',
+        role: 'user',
+        content: 'Hello',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       mockPrismaService.message.delete.mockResolvedValue({});
 

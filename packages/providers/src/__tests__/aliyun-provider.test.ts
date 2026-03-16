@@ -1,6 +1,35 @@
 import { AliyunProvider, AliyunProviderError, AliyunAPIError, AliyunNetworkError, AliyunTimeoutError } from '../aliyun-provider'
 import { ChatCompletionRequest, ModelConfig } from '@ai-engine/shared'
 
+// Mock global fetch for Aliyun API tests
+const mockFetchResponse = {
+  ok: true,
+  json: async () => ({
+    output: {
+      text: 'Hello! How can I help you?',
+      finish_reason: 'stop',
+    },
+    usage: {
+      input_tokens: 10,
+      output_tokens: 20,
+      total_tokens: 30,
+    },
+    request_id: 'test-request-id',
+  }),
+  status: 200,
+}
+
+// Store original fetch
+const originalFetch = global.fetch
+
+beforeAll(() => {
+  global.fetch = vi.fn(() => Promise.resolve(mockFetchResponse)) as any
+})
+
+afterAll(() => {
+  global.fetch = originalFetch
+})
+
 /**
  * Mock logger for testing
  */
@@ -105,13 +134,11 @@ describe('AliyunProvider', () => {
     })
 
     it('should return content and usage on success', async () => {
-      // Mock implementation for testing structure
       const result = await provider.chatComplete(testRequest, testConfig)
       
-      // Without network mocking, we can't test actual API calls
-      // This test verifies the method signature and return type
-      expect(result).toHaveProperty('content')
-      expect(result).toHaveProperty('usage')
+      expect(result.content).toBeDefined()
+      expect(result.usage).toBeDefined()
+      expect(result.usage?.totalTokens).toBeGreaterThan(0)
     })
   })
 

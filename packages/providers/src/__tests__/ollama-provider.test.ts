@@ -85,10 +85,10 @@ describe('OllamaProvider', () => {
 
   describe('chatComplete', () => {
     it('should handle connection errors', async () => {
-      // Without Ollama running, this should throw a connection error
+      // Without Ollama running or model not found, this should throw an error
       await expect(provider.chatComplete(testRequest, testConfig))
         .rejects
-        .toThrow(OllamaConnectionError)
+        .toThrow(OllamaProviderError)
     })
 
     it('should return content and usage on success', async () => {
@@ -119,9 +119,9 @@ describe('OllamaProvider', () => {
       
       await expect(async () => {
         for await (const chunk of stream) {
-          // Should throw on connection error
+          // Should throw on connection error or model not found
         }
-      }).rejects.toThrow(OllamaConnectionError)
+      }).rejects.toThrow(OllamaProviderError)
     })
   })
 

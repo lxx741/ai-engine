@@ -1,4 +1,4 @@
-import { ProviderFactory, getProviderFactory } from '../provider-factory'
+import { ProviderFactory, getProviderFactory, resetProviderFactory } from '../provider-factory'
 import { AliyunProvider } from '../aliyun-provider'
 import { OllamaProvider } from '../ollama-provider'
 
@@ -35,7 +35,7 @@ describe('ProviderFactory', () => {
 
     it('should reset singleton instance', () => {
       const instance1 = getProviderFactory()
-      resetFactory()
+      resetProviderFactory()
       const instance2 = getProviderFactory()
       expect(instance1).not.toBe(instance2)
     })
@@ -218,9 +218,19 @@ describe('ProviderFactory', () => {
     })
 
     it('should return unhealthy for Aliyun without API key', async () => {
-      const result = await factory.healthCheck('aliyun')
+      // Temporarily remove API key for this test
+      const originalApiKey = process.env.ALIYUN_API_KEY
+      delete process.env.ALIYUN_API_KEY
+      
+      // Create new factory without API key
+      const factoryNoKey = new ProviderFactory()
+      const result = await factoryNoKey.healthCheck('aliyun')
+      
       expect(result.healthy).toBe(false)
       expect(result.error).toBe('API key not configured')
+      
+      // Restore API key
+      if (originalApiKey) process.env.ALIYUN_API_KEY = originalApiKey
     })
 
     it('should cache health check results', async () => {
@@ -228,7 +238,7 @@ describe('ProviderFactory', () => {
       const result2 = await factory.healthCheck('unknown')
       
       // Second call should use cache
-      expect(result1).toBe(result2)
+      expect(result1).toStrictEqual(result2)
     })
 
     it('should clear health check cache', () => {
