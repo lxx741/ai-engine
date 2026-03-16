@@ -13,7 +13,7 @@ describe('ApiKeyGuard', () => {
       getAllAndOverride: vi.fn(),
     };
     mockConfigService = {
-      get: vi.fn(),
+      get: vi.fn((key: string, defaultValue?: any) => defaultValue),
     };
 
     guard = new ApiKeyGuard(

@@ -36,51 +36,104 @@ export function createSSESource(
   let retryCount = 0;
   let eventSource: EventSource | null = null;
   let isClosed = false;
+  let controller: AbortController | null = null;
 
   const connect = () => {
     if (isClosed) return;
 
-    try {
-      eventSource = new EventSource(url);
+    retryCount++;
+    controller = new AbortController();
 
-      eventSource.onopen = () => {
-        retryCount = 0;
-      };
-
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-
-          if (data.type === 'done') {
-            callbacks.onDone?.();
-            close();
-            return;
-          }
-
-          callbacks.onChunk?.(data as StreamChunkDto);
-        } catch (error) {
-          callbacks.onError?.(new Error('Failed to parse SSE data'));
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      };
 
-      eventSource.onerror = (error) => {
-        if (retryCount < maxRetries) {
-          retryCount++;
+        retryCount = 0;
+        const reader = response.body?.getReader();
+        if (!reader) {
+          throw new Error('ReadableStream not supported');
+        }
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        const processStream = async () => {
+          if (isClosed) return;
+
+          try {
+            const { done, value } = await reader.read();
+
+            if (done) {
+              callbacks.onDone?.();
+              close();
+              return;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                try {
+                  const parsed = JSON.parse(data);
+
+                  if (parsed.type === 'done') {
+                    callbacks.onDone?.();
+                    close();
+                    return;
+                  }
+
+                  callbacks.onChunk?.(parsed as StreamChunkDto);
+                } catch (e) {
+                  console.error('Failed to parse SSE data:', e);
+                }
+              }
+            }
+
+            processStream();
+          } catch (error) {
+            if (!isClosed && retryCount < maxRetries) {
+              setTimeout(() => {
+                if (!isClosed) {
+                  connect();
+                }
+              }, retryDelay * retryCount);
+            } else {
+              callbacks.onError?.(error instanceof Error ? error : new Error('Stream failed'));
+              close();
+            }
+          }
+        };
+
+        processStream();
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') {
+          return;
+        }
+        if (!isClosed && retryCount < maxRetries) {
           setTimeout(() => {
             if (!isClosed) {
               connect();
             }
           }, retryDelay * retryCount);
         } else {
-          callbacks.onError?.(new Error('Connection failed after multiple retries'));
+          callbacks.onError?.(error instanceof Error ? error : new Error('Connection failed'));
           close();
         }
-      };
-    } catch (error) {
-      callbacks.onError?.(
-        error instanceof Error ? error : new Error('Failed to create SSE connection')
-      );
-    }
+      });
   };
 
   const close = () => {
@@ -88,6 +141,10 @@ export function createSSESource(
     if (eventSource) {
       eventSource.close();
       eventSource = null;
+    }
+    if (controller) {
+      controller.abort();
+      controller = null;
     }
   };
 

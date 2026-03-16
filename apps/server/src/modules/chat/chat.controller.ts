@@ -6,12 +6,13 @@ import {
   Body,
   Param,
   Query,
-  Sse,
   MessageEvent,
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -73,13 +74,16 @@ export class ChatController {
   @ApiResponse({ status: 403, description: '未授权' })
   @ApiResponse({ status: 500, description: '服务器错误' })
   async getConversations(
-    @Query('page') page: number = 1,
-    @Query('pageSize') pageSize: number = 20,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
   ) {
     try {
-      return await this.conversationService.findAll(page, pageSize);
+      const pageNum = page ? parseInt(page, 10) : 1;
+      const pageSizeNum = pageSize ? parseInt(pageSize, 10) : 20;
+      return await this.conversationService.findAll(pageNum, pageSizeNum);
     } catch (error) {
-      throw new InternalServerErrorException('获取会话列表失败');
+      console.error('Get conversations error:', error);
+      throw new InternalServerErrorException('获取会话列表失败', error.message);
     }
   }
 
@@ -125,15 +129,18 @@ export class ChatController {
   @ApiResponse({ status: 500, description: '服务器错误' })
   async getConversationMessages(
     @Param('id') id: string,
-    @Query('limit') limit: number = 50,
+    @Query('limit') limit?: number,
   ): Promise<ChatMessageDto[]> {
     try {
+      const limitNum = limit ?? 50;
+      console.log('Getting messages for conversation:', id, 'limit:', limitNum);
       const conversation = await this.conversationService.findOne(id);
       if (!conversation) {
         throw new NotFoundException(`会话 "${id}" 不存在`);
       }
 
-      const messages = await this.conversationService.getHistory(id, limit);
+      const messages = await this.conversationService.getHistory(id, limitNum);
+      console.log('Found messages:', messages.length);
       return messages.map((msg) => ({
         id: msg.id,
         role: msg.role,
@@ -143,10 +150,11 @@ export class ChatController {
         createdAt: msg.createdAt,
       }));
     } catch (error) {
+      console.error('Get conversation messages error:', error);
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('获取消息历史失败');
+      throw new InternalServerErrorException('获取消息历史失败', error.message);
     }
   }
 
@@ -220,21 +228,20 @@ export class ChatController {
   }
 
   @Post('completions/stream')
-  @Sse()
-  @ApiOperation({ summary: '发送消息（SSE 流式）', description: '发送消息并通过 SSE 流式接收 AI 响应' })
+  @ApiOperation({ summary: '发送消息（流式）', description: '发送消息并通过流式接收 AI 响应' })
   @ApiBody({ type: SendMessageDto })
   @ApiResponse({
     status: 200,
     description: '流式响应成功',
-    type: StreamChunkDto,
   })
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @ApiResponse({ status: 404, description: '会话不存在' })
   @ApiResponse({ status: 403, description: '未授权' })
   @ApiResponse({ status: 500, description: '服务器错误' })
-  streamCompletion(
+  async streamCompletion(
     @Body() sendMessageDto: SendMessageDto,
-  ): AsyncIterableIterator<MessageEvent> {
+    @Res() res: Response,
+  ) {
     if (!sendMessageDto?.conversationId) {
       throw new BadRequestException('conversationId 是必填参数');
     }
@@ -242,33 +249,24 @@ export class ChatController {
       throw new BadRequestException('message 是必填参数');
     }
 
-    return this.handleStream(
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const stream = this.chatService.sendStream(
       sendMessageDto.message,
       sendMessageDto.conversationId,
       sendMessageDto.userId,
     );
-  }
-
-  private async *handleStream(
-    message: string,
-    conversationId: string,
-    userId?: string,
-  ): AsyncIterableIterator<MessageEvent> {
-    const stream = this.chatService.sendStream(message, conversationId, userId);
 
     for await (const chunk of stream) {
-      yield {
-        data: JSON.stringify(chunk),
-        type: 'message',
-      };
-
+      res.write(`data: ${JSON.stringify(chunk)}\n\n`);
       if (chunk.finishReason === 'stop') {
-        yield {
-          data: JSON.stringify({ type: 'done' }),
-          type: 'done',
-        };
+        res.write(`data: ${JSON.stringify({ type: 'done' })}\n\n`);
         break;
       }
     }
+
+    res.end();
   }
 }

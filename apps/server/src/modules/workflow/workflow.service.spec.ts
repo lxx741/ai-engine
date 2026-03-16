@@ -30,10 +30,8 @@ const mockExecute = vi.fn();
 const mockExecuteNode = vi.fn();
 
 // Hoisted mock for @ai-engine/core (must be before any imports that use it)
-vi.mock('@ai-engine/core', async (importOriginal) => {
-  const actual = await importOriginal();
+vi.mock('@ai-engine/core', async () => {
   return {
-    ...actual,
     createWorkflowExecutor: vi.fn(() => ({
       execute: mockExecute,
       executeNode: mockExecuteNode,
@@ -115,10 +113,12 @@ describe('WorkflowService', () => {
 
       const result = await service.create(createDto);
 
-      expect(result.definition.nodes).toBeDefined();
-      expect(result.definition.nodes.length).toBeGreaterThan(0);
-      expect(result.definition.edges).toBeDefined();
-      expect(result.definition.edges.length).toBeGreaterThan(0);
+      expect(result).toEqual(expectedWorkflow);
+      const def = result.definition as any;
+      expect(def.nodes).toBeDefined();
+      expect(def.nodes.length).toBeGreaterThan(0);
+      expect(def.edges).toBeDefined();
+      expect(def.edges.length).toBeGreaterThan(0);
     });
   });
 

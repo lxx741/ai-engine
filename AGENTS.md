@@ -52,13 +52,17 @@ pnpm --filter @ai-engine/server test -- chat.service.spec.ts
 pnpm --filter @ai-engine/server test -- -t "ChatService"
 
 # Server - watch single file
-pnpm --filter @ai-engine/server test:watch -- chat.service.spec.ts
+pnpm --filter @ai-engine/server test:watch chat.service.spec.ts
 
-# Providers package
-pnpm --filter @ai-engine/providers test -- provider-factory.test.ts
+# Server - with coverage
+pnpm --filter @ai-engine/server test:cov
 
 # E2E tests
 pnpm --filter @ai-engine/server test:e2e
+
+# Packages (core, providers, shared)
+pnpm --filter @ai-engine/core test -- variable-manager.spec.ts
+pnpm --filter @ai-engine/providers test -- provider-factory.test.ts
 ```
 
 ## Code Style Guidelines
@@ -66,8 +70,8 @@ pnpm --filter @ai-engine/server test:e2e
 ### TypeScript Configuration
 - **Target:** ES2022 (server), ESNext (web)
 - **Module:** CommonJS (server), ESM (web/Next.js)
-- **Strict mode:** Enabled with strictNullChecks
-- **Path aliases:** @ai-engine/*, @/* (web)
+- **Strict mode:** Server has relaxed strictness (strictNullChecks: false), web is fully strict
+- **Path aliases:** @ai-engine/* (server packages), @/* (src shortcut)
 
 ### Import Conventions
 1. **Order:** External packages → Internal modules → Relative imports
@@ -125,25 +129,27 @@ try {
 ```
 
 ### Testing Conventions
-- **Framework:** Jest (server), none configured for web yet
+- **Framework:** Vitest (server), none configured for web yet
 - **File naming:** `*.spec.ts` (NestJS convention), `*.test.ts` (packages)
 - **Test structure:** describe/it blocks with descriptive names
-- **Mocks:** Use NestJS TestingModule for dependency injection
+- **Mocks:** Use vi.mock() for module mocking, vi.fn() for spies
 - **Async tests:** Use async/await pattern
+- **Setup:** Direct instantiation with mocked dependencies (not TestingModule)
 
 ```typescript
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('@ai-engine/providers', async () => {
+  const actual = await vi.importActual('@ai-engine/providers');
+  return { ...actual, getProviderFactory: vi.fn(...) };
+});
+
 describe('ChatService', () => {
   let service: ChatService;
   
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ChatService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
-    }).compile();
-    
-    service = module.get<ChatService>(ChatService);
+  beforeEach(() => {
+    service = new ChatService(mockPrisma, mockConversation, mockMessage);
+    vi.clearAllMocks();
   });
   
   it('should be defined', () => {

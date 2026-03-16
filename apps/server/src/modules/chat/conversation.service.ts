@@ -87,10 +87,11 @@ export class ConversationService {
   }
 
   async getHistory(conversationId: string, limit: number = 20) {
+    const safeLimit = typeof limit === 'number' && !isNaN(limit) ? limit : 20;
     const messages = await this.prisma.message.findMany({
       where: { conversationId },
       orderBy: { createdAt: 'desc' },
-      take: limit,
+      take: safeLimit,
     });
 
     return messages.reverse();
