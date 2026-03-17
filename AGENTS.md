@@ -28,7 +28,7 @@ pnpm test             # Run all tests
 pnpm --filter @ai-engine/server dev          # Dev mode with watch
 pnpm --filter @ai-engine/server build        # Compile to dist/
 pnpm --filter @ai-engine/server lint         # ESLint with auto-fix
-pnpm --filter @ai-engine/server test         # Run Jest tests
+pnpm --filter @ai-engine/server test         # Run Vitest tests
 pnpm --filter @ai-engine/server test:watch   # Watch mode
 pnpm --filter @ai-engine/server test:cov     # With coverage
 pnpm --filter @ai-engine/server db:generate  # Prisma generate

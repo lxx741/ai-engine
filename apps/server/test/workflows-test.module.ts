@@ -12,7 +12,10 @@ export class MockWorkflowService {
       name: data.name,
       description: data.description,
       appId: data.appId,
-      definition: data.definition || { nodes: [], edges: [] },
+      definition: {
+        nodes: data.nodes || [],
+        edges: data.edges || [],
+      },
       createdAt: new Date(),
     };
   }
