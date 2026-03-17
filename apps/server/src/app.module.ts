@@ -15,7 +15,11 @@ import { ToolModule } from './modules/tool/tool.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: ['.env.test', '.env.local', '.env'],
+      ignoreEnvVars: false,
+      load: [() => ({
+        API_PREFIX: process.env.API_PREFIX || '/api',
+      })],
     }),
     ThrottlerModule.forRoot([
       {

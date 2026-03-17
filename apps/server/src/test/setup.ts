@@ -71,3 +71,13 @@ vi.mock('@ai-engine/core', () => ({
   })),
   createWorkflowExecutor: vi.fn(),
 }));
+
+// 4. Mock ToolRegistry
+vi.mock('../modules/tool/tool.registry', () => ({
+  ToolRegistry: vi.fn().mockImplementation(() => ({
+    register: vi.fn(),
+    get: vi.fn(),
+    list: vi.fn(() => []),
+    execute: vi.fn(() => ({ success: true, output: 'mocked output' })),
+  })),
+}));

@@ -27,8 +27,9 @@ async function bootstrap() {
     }),
   );
 
-  // API prefix
-  app.setGlobalPrefix(configService.get('API_PREFIX', '/api'));
+  // API prefix - use process.env directly as fallback
+  const apiPrefix = configService.get('API_PREFIX') || process.env.API_PREFIX || '/api';
+  app.setGlobalPrefix(apiPrefix);
 
   // Swagger documentation
   const config = new DocumentBuilder()
