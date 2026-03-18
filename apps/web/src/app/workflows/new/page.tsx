@@ -4,17 +4,29 @@ import { useRouter } from 'next/navigation'
 import { useApps } from '@/hooks/use-apps'
 import { useCreateWorkflow } from '@/hooks/use-workflows'
 import { WorkflowForm } from '@/components/workflow/workflow-form'
+import { CanvasEditor } from '@/components/workflow/canvas-editor'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { isFeatureEnabled } from '@/lib/features'
 
 export default function NewWorkflowPage() {
   const router = useRouter()
   const { data: apps, isLoading: appsLoading } = useApps()
   const createWorkflow = useCreateWorkflow()
+  
+  // Check if visual editor is enabled
+  const useVisualEditor = isFeatureEnabled('VISUAL_EDITOR')
 
   const handleSubmit = async (data: any) => {
     try {
       console.log('Creating workflow with data:', JSON.stringify(data, null, 2))
-      const workflow = await createWorkflow.mutateAsync(data)
+      
+      // Auto-add appId if not present
+      const submitData = { ...data }
+      if (!submitData.appId && apps && apps.length > 0) {
+        submitData.appId = apps[0].id
+      }
+      
+      const workflow = await createWorkflow.mutateAsync(submitData)
       console.log('Workflow created:', workflow.id)
       router.push(`/workflows/${workflow.id}/edit`)
     } catch (error: any) {
@@ -40,25 +52,44 @@ export default function NewWorkflowPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-5xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">新建工作流</h1>
-        <p className="text-muted-foreground mt-1">创建一个新的工作流</p>
+    <div className="h-screen flex flex-col">
+      <div className="container mx-auto p-6 flex-shrink-0">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">
+            {useVisualEditor ? '新建工作流（可视化）' : '新建工作流'}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {useVisualEditor 
+              ? '使用可视化编辑器创建工作流' 
+              : '创建一个新的工作流'}
+          </p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>工作流配置</CardTitle>
-          <CardDescription>填写工作流的基本信息并配置节点</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <WorkflowForm
-            apps={apps}
+      <div className="flex-1 overflow-hidden">
+        {useVisualEditor ? (
+          <CanvasEditor 
             onSubmit={handleSubmit}
             onCancel={handleCancel}
           />
-        </CardContent>
-      </Card>
+        ) : (
+          <div className="container mx-auto p-6 max-w-5xl overflow-y-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle>工作流配置</CardTitle>
+                <CardDescription>填写工作流的基本信息并配置节点</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <WorkflowForm
+                  apps={apps}
+                  onSubmit={handleSubmit}
+                  onCancel={handleCancel}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

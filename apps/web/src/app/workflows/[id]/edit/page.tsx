@@ -4,7 +4,11 @@ import { useRouter, useParams } from 'next/navigation'
 import { useApps } from '@/hooks/use-apps'
 import { useWorkflow, useUpdateWorkflow } from '@/hooks/use-workflows'
 import { WorkflowForm } from '@/components/workflow/workflow-form'
+import { CanvasEditor } from '@/components/workflow/canvas-editor'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { isFeatureEnabled } from '@/lib/features'
+import { useEffect } from 'react'
+import { useCanvasStore } from '@/components/workflow/canvas-provider'
 
 export default function EditWorkflowPage() {
   const router = useRouter()
@@ -14,6 +18,19 @@ export default function EditWorkflowPage() {
   const { data: workflow, isLoading: workflowLoading } = useWorkflow(workflowId)
   const { data: apps, isLoading: appsLoading } = useApps()
   const updateWorkflow = useUpdateWorkflow()
+  const { setDefinition, setWorkflowName, setWorkflowDescription } = useCanvasStore()
+  
+  // Check if visual editor is enabled
+  const useVisualEditor = isFeatureEnabled('VISUAL_EDITOR')
+
+  // Initialize canvas with workflow definition
+  useEffect(() => {
+    if (workflow && useVisualEditor && workflow.definition) {
+      setDefinition(workflow.definition)
+      setWorkflowName(workflow.name)
+      setWorkflowDescription(workflow.description || '')
+    }
+  }, [workflow, useVisualEditor, setDefinition, setWorkflowName, setWorkflowDescription])
 
   const handleSubmit = async (data: any) => {
     try {
@@ -53,26 +70,45 @@ export default function EditWorkflowPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-5xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">编辑工作流</h1>
-        <p className="text-muted-foreground mt-1">修改工作流配置</p>
+    <div className="h-screen flex flex-col">
+      <div className="container mx-auto p-6 flex-shrink-0">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">
+            {useVisualEditor ? '编辑工作流（可视化）' : '编辑工作流'}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {useVisualEditor 
+              ? '使用可视化编辑器修改工作流' 
+              : '修改工作流配置'}
+          </p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>工作流配置</CardTitle>
-          <CardDescription>修改工作流的基本信息和节点配置</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <WorkflowForm
-            workflow={workflow}
-            apps={apps}
+      <div className="flex-1 overflow-hidden">
+        {useVisualEditor ? (
+          <CanvasEditor 
             onSubmit={handleSubmit}
             onCancel={handleCancel}
           />
-        </CardContent>
-      </Card>
+        ) : (
+          <div className="container mx-auto p-6 max-w-5xl overflow-y-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle>工作流配置</CardTitle>
+                <CardDescription>修改工作流的基本信息和节点配置</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <WorkflowForm
+                  workflow={workflow}
+                  apps={apps}
+                  onSubmit={handleSubmit}
+                  onCancel={handleCancel}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
