@@ -178,7 +178,9 @@ describe('ChatService', () => {
 ```bash
 pnpm --filter @ai-engine/server db:generate   # Generate Prisma Client
 pnpm --filter @ai-engine/server db:migrate    # Create and apply migration
+pnpm --filter @ai-engine/server db:migrate:prod  # Production deploy (no prompts)
 pnpm --filter @ai-engine/server db:studio     # Open Prisma Studio GUI
+pnpm --filter @ai-engine/server db:seed       # Run seed script
 ```
 
 ### Environment Variables

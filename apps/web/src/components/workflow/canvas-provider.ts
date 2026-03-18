@@ -1,63 +1,63 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import type { Node, Edge } from '@xyflow/react'
-import type { WorkflowDefinition } from '@/hooks/use-workflows'
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import type { Node, Edge } from '@xyflow/react';
+import type { WorkflowDefinition } from '@/hooks/use-workflows';
 
 export interface Viewport {
-  x: number
-  y: number
-  zoom: number
+  x: number;
+  y: number;
+  zoom: number;
 }
 
 interface CanvasState {
   // State
-  nodes: Node[]
-  edges: Edge[]
-  selectedNode?: string
-  selectedEdge?: string
-  viewport: Viewport
+  nodes: Node[];
+  edges: Edge[];
+  selectedNode?: string;
+  selectedEdge?: string;
+  viewport: Viewport;
 
   // Metadata
-  workflowName?: string
-  workflowDescription?: string
+  workflowName?: string;
+  workflowDescription?: string;
 
   // Actions - Nodes
-  addNode: (node: Node) => void
-  updateNode: (id: string, updates: Partial<Node>) => void
-  deleteNode: (id: string) => void
-  updateNodeConfig: (id: string, config: Record<string, any>) => void
+  addNode: (node: Node) => void;
+  updateNode: (id: string, updates: Partial<Node>) => void;
+  deleteNode: (id: string) => void;
+  updateNodeConfig: (id: string, config: Record<string, any>) => void;
 
   // Actions - Edges
-  addEdge: (edge: Edge) => void
-  deleteEdge: (id: string) => void
-  updateEdge: (id: string, updates: Partial<Edge>) => void
+  addEdge: (edge: Edge) => void;
+  deleteEdge: (id: string) => void;
+  updateEdge: (id: string, updates: Partial<Edge>) => void;
 
   // Actions - Selection
-  setSelectedNode: (id: string | undefined) => void
-  setSelectedEdge: (id: string | undefined) => void
-  clearSelection: () => void
+  setSelectedNode: (id: string | undefined) => void;
+  setSelectedEdge: (id: string | undefined) => void;
+  clearSelection: () => void;
 
   // Actions - Viewport
-  setViewport: (viewport: Viewport) => void
+  setViewport: (viewport: Viewport) => void;
 
   // Actions - Metadata
-  setWorkflowName: (name: string) => void
-  setWorkflowDescription: (description: string) => void
+  setWorkflowName: (name: string) => void;
+  setWorkflowDescription: (description: string) => void;
 
   // Actions - Bulk
-  setNodes: (nodes: Node[]) => void
-  setEdges: (edges: Edge[]) => void
-  setDefinition: (definition: WorkflowDefinition) => void
+  setNodes: (nodes: Node[]) => void;
+  setEdges: (edges: Edge[]) => void;
+  setDefinition: (definition: WorkflowDefinition) => void;
 
   // Actions - Persistence
-  saveToLocalStorage: () => void
-  loadFromLocalStorage: () => void
-  clearCanvas: () => void
+  saveToLocalStorage: () => void;
+  loadFromLocalStorage: () => void;
+  clearCanvas: () => void;
 }
 
-const DEFAULT_VIEWPORT: Viewport = { x: 0, y: 0, zoom: 1 }
+const DEFAULT_VIEWPORT: Viewport = { x: 0, y: 0, zoom: 1 };
 
-const STORAGE_KEY = 'workflow-canvas-state'
+const STORAGE_KEY = 'workflow-canvas-state';
 
 export const useCanvasStore = create<CanvasState>()(
   persist(
@@ -92,7 +92,9 @@ export const useCanvasStore = create<CanvasState>()(
       updateNodeConfig: (id, config) =>
         set((state) => ({
           nodes: state.nodes.map((n) =>
-            n.id === id ? { ...n, data: { ...n.data, config: { ...(n.data as any)?.config, ...config } } } : n
+            n.id === id
+              ? { ...n, data: { ...n.data, config: { ...(n.data as any)?.config, ...config } } }
+              : n
           ),
         })),
 
@@ -153,7 +155,7 @@ export const useCanvasStore = create<CanvasState>()(
             description: node.config?.description,
             config: node.config || {},
           },
-        }))
+        }));
         const convertedEdges: Edge[] = (definition.edges || []).map((edge) => ({
           id: edge.id,
           source: edge.source,
@@ -161,36 +163,36 @@ export const useCanvasStore = create<CanvasState>()(
           data: {
             condition: edge.condition,
           },
-        }))
+        }));
         set({
           nodes: convertedNodes,
           edges: convertedEdges,
-        })
+        });
       },
 
       // Persistence actions
       saveToLocalStorage: () => {
-        const { nodes, edges, workflowName, workflowDescription } = get()
-        const data = { nodes, edges, workflowName, workflowDescription }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-        console.log('✅ Canvas auto-saved')
+        const { nodes, edges, workflowName, workflowDescription } = get();
+        const data = { nodes, edges, workflowName, workflowDescription };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        console.log('✅ Canvas auto-saved');
       },
 
       loadFromLocalStorage: () => {
         try {
-          const saved = localStorage.getItem(STORAGE_KEY)
+          const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) {
-            const data = JSON.parse(saved)
+            const data = JSON.parse(saved);
             set({
               nodes: data.nodes || [],
               edges: data.edges || [],
               workflowName: data.workflowName,
               workflowDescription: data.workflowDescription,
-            })
-            console.log('✅ Canvas loaded from local storage')
+            });
+            console.log('✅ Canvas loaded from local storage');
           }
         } catch (error) {
-          console.error('Failed to load canvas from local storage:', error)
+          console.error('Failed to load canvas from local storage:', error);
         }
       },
 
@@ -215,19 +217,24 @@ export const useCanvasStore = create<CanvasState>()(
       }),
     }
   )
-)
+);
 
 // Helper hook for auto-save
-import { useEffect } from 'react'
-import debounce from 'lodash/debounce'
+import { useEffect } from 'react';
+import debounce from 'lodash/debounce';
 
 export function useAutoSave() {
-  const { nodes, edges, saveToLocalStorage } = useCanvasStore()
+  const { nodes, edges, saveToLocalStorage } = useCanvasStore();
 
-  const debouncedSave = useEffect(
-    debounce(() => {
-      saveToLocalStorage()
-    }, 1000),
-    [nodes, edges, saveToLocalStorage]
-  )
+  useEffect(() => {
+    const debouncedSave = debounce(() => {
+      saveToLocalStorage();
+    }, 1000);
+
+    debouncedSave();
+
+    return () => {
+      debouncedSave.cancel();
+    };
+  }, [nodes, edges, saveToLocalStorage]);
 }

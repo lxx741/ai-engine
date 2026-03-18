@@ -179,9 +179,9 @@ export function CanvasEditor({
       };
 
       console.log('Dropped node:', newNode);
-      setNodes((nds) => [...nds, newNode]);
+      setNodes([...nodes, newNode]);
     },
-    [setNodes]
+    [setNodes, nodes]
   );
 
   // Handle node deletion (keyboard shortcut)
