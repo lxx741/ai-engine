@@ -31,6 +31,16 @@ const nodeTypes = {
   tool: ToolNode,
 };
 
+// Node type definitions for drag and drop
+const NODE_TYPES = [
+  { type: 'start', label: '开始节点' },
+  { type: 'llm', label: 'LLM 调用' },
+  { type: 'http', label: 'HTTP 请求' },
+  { type: 'condition', label: '条件判断' },
+  { type: 'tool', label: '工具调用' },
+  { type: 'end', label: '结束节点' },
+];
+
 interface CanvasEditorProps {
   initialNodes?: Node[];
   initialEdges?: Edge[];
@@ -129,6 +139,51 @@ export function CanvasEditor({
     clearSelection();
   }, [clearSelection]);
 
+  // Handle drag over (required for drop to work)
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  // Handle drop - create new node from sidebar
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+
+      const type = event.dataTransfer.getData('application/reactflow');
+      if (!type) {
+        console.warn('No node type in drag data');
+        return;
+      }
+
+      // Calculate position relative to the React Flow container
+      const reactFlowBounds = event.currentTarget.getBoundingClientRect();
+      const position = {
+        x: event.clientX - reactFlowBounds.left,
+        y: event.clientY - reactFlowBounds.top,
+      };
+
+      // Get node label
+      const nodeType = NODE_TYPES.find((t) => t.type === type);
+      const label = nodeType?.label || type;
+
+      // Create new node
+      const newNode: Node = {
+        id: `node_${Date.now()}`,
+        type,
+        position,
+        data: {
+          name: label,
+          config: {},
+        },
+      };
+
+      console.log('Dropped node:', newNode);
+      setNodes((nds) => [...nds, newNode]);
+    },
+    [setNodes]
+  );
+
   // Handle node deletion (keyboard shortcut)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -157,7 +212,7 @@ export function CanvasEditor({
         <Sidebar />
 
         {/* Canvas */}
-        <div className="flex-1 h-full">
+        <div className="flex-1 h-full" onDragOver={onDragOver} onDrop={onDrop}>
           <ReactFlow
             nodes={nodes}
             edges={edges}

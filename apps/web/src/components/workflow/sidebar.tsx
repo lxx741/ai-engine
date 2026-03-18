@@ -49,12 +49,21 @@ const NODE_TYPES = [
 
 export function Sidebar() {
   const handleDragStart = (event: React.DragEvent, nodeType: string) => {
+    // Set the drag data
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
+    
+    // Set drag image (optional, for better UX)
+    const dragImage = event.currentTarget.querySelector('.flex');
+    if (dragImage) {
+      // Use the first child as drag image
+    }
+    
+    console.log('Dragging node type:', nodeType);
   };
 
   return (
-    <div className="w-64 bg-white border-r shadow-sm overflow-y-auto">
+    <div className="w-64 bg-white border-r shadow-sm overflow-y-auto flex-shrink-0">
       <div className="p-4">
         <h2 className="text-lg font-semibold mb-1">节点工具箱</h2>
         <p className="text-sm text-muted-foreground mb-4">拖拽节点到画布</p>
@@ -65,9 +74,9 @@ export function Sidebar() {
               key={type}
               draggable
               onDragStart={(e) => handleDragStart(e, type)}
-              className="group cursor-move"
+              className="group cursor-grab active:cursor-grabbing"
             >
-              <div className="flex items-start gap-3 p-3 rounded-lg border bg-white hover:bg-slate-50 hover:border-slate-300 transition-all">
+              <div className="flex items-start gap-3 p-3 rounded-lg border bg-white hover:bg-slate-50 hover:border-slate-300 hover:shadow-md transition-all select-none">
                 <div
                   className={`w-10 h-10 rounded-lg ${color} flex items-center justify-center flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow`}
                 >
