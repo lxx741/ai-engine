@@ -1,37 +1,35 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useCreateApp } from '@/hooks/use-apps'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCreateApp } from '@/hooks/use-apps';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function NewAppPage() {
-  const router = useRouter()
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const createApp = useCreateApp()
+  const router = useRouter();
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const createApp = useCreateApp();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const app = await createApp.mutateAsync({ name, description })
-      router.push(`/apps/${app.id}`)
+      const app = await createApp.mutateAsync({ name, description });
+      router.push(`/apps/${app.id}`);
     } catch (error) {
-      alert('创建失败：' + (error as Error).message)
+      alert('创建失败：' + (error as Error).message);
     }
-  }
+  };
 
   return (
     <div className="container mx-auto p-6">
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle>创建新应用</CardTitle>
-          <CardDescription>
-            填写以下信息创建您的 AI 应用
-          </CardDescription>
+          <CardDescription>填写以下信息创建您的 AI 应用</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -55,17 +53,10 @@ export default function NewAppPage() {
               />
             </div>
             <div className="flex gap-4 pt-4">
-              <Button 
-                type="submit" 
-                disabled={createApp.isPending}
-              >
+              <Button type="submit" disabled={createApp.isPending}>
                 {createApp.isPending ? '创建中...' : '创建应用'}
               </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => router.back()}
-              >
+              <Button type="button" variant="outline" onClick={() => router.back()}>
                 取消
               </Button>
             </div>
@@ -73,5 +64,5 @@ export default function NewAppPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

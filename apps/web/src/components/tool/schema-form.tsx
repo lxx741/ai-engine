@@ -1,33 +1,33 @@
-'use client'
+'use client';
 
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 
 interface SchemaFormProps {
   schema: {
-    type: string
-    properties: Record<string, any>
-    required?: string[]
-  }
-  value: Record<string, any>
-  onChange: (value: Record<string, any>) => void
+    type: string;
+    properties: Record<string, any>;
+    required?: string[];
+  };
+  value: Record<string, any>;
+  onChange: (value: Record<string, any>) => void;
 }
 
 export function SchemaForm({ schema, value, onChange }: SchemaFormProps) {
-  const properties = schema.properties || {}
+  const properties = schema.properties || {};
 
   const handleChange = (key: string, fieldValue: any) => {
     onChange({
       ...value,
       [key]: fieldValue,
-    })
-  }
+    });
+  };
 
   const renderField = (key: string, prop: any) => {
-    const fieldValue = value[key] ?? ''
-    const isRequired = schema.required?.includes(key)
+    const fieldValue = value[key] ?? '';
+    const isRequired = schema.required?.includes(key);
 
     switch (prop.type) {
       case 'boolean':
@@ -42,7 +42,7 @@ export function SchemaForm({ schema, value, onChange }: SchemaFormProps) {
               onCheckedChange={(checked) => handleChange(key, checked)}
             />
           </div>
-        )
+        );
 
       case 'integer':
       case 'number':
@@ -59,7 +59,7 @@ export function SchemaForm({ schema, value, onChange }: SchemaFormProps) {
               placeholder={`请输入${key}`}
             />
           </div>
-        )
+        );
 
       case 'object':
         return (
@@ -69,13 +69,15 @@ export function SchemaForm({ schema, value, onChange }: SchemaFormProps) {
             </Label>
             <Textarea
               id={key}
-              value={typeof fieldValue === 'string' ? fieldValue : JSON.stringify(fieldValue, null, 2)}
+              value={
+                typeof fieldValue === 'string' ? fieldValue : JSON.stringify(fieldValue, null, 2)
+              }
               onChange={(e) => handleChange(key, e.target.value)}
               placeholder={`请输入 JSON 对象`}
               rows={4}
             />
           </div>
-        )
+        );
 
       case 'string':
       default:
@@ -93,7 +95,7 @@ export function SchemaForm({ schema, value, onChange }: SchemaFormProps) {
                 rows={3}
               />
             </div>
-          )
+          );
         }
         return (
           <div key={key} className="space-y-2">
@@ -108,13 +110,13 @@ export function SchemaForm({ schema, value, onChange }: SchemaFormProps) {
               placeholder={`请输入${key}`}
             />
           </div>
-        )
+        );
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
       {Object.entries(properties).map(([key, prop]) => renderField(key, prop))}
     </div>
-  )
+  );
 }

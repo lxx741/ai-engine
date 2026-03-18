@@ -1,14 +1,14 @@
-import { NodeProps } from '@xyflow/react'
-import { memo } from 'react'
-import { Bot } from 'lucide-react'
-import { BaseNode, BaseNodeData, NODE_TYPES } from './base-node'
+import { NodeProps } from '@xyflow/react';
+import { memo } from 'react';
+import { Bot } from 'lucide-react';
+import { BaseNode, BaseNodeData, NODE_TYPES } from './base-node';
 
 export type LLMNodeData = BaseNodeData & {
-  modelId?: string
-  prompt?: string
-  temperature?: number
-  maxTokens?: number
-}
+  modelId?: string;
+  prompt?: string;
+  temperature?: number;
+  maxTokens?: number;
+};
 
 export const LLMNode = memo(function LLMNode(props: NodeProps) {
   return (
@@ -19,5 +19,5 @@ export const LLMNode = memo(function LLMNode(props: NodeProps) {
       gradientFrom={NODE_TYPES.llm.gradientFrom}
       gradientTo={NODE_TYPES.llm.gradientTo}
     />
-  )
-})
+  );
+});

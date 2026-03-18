@@ -1,25 +1,31 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { WorkflowNode, WorkflowEdge } from '@/hooks/use-workflows'
-import { Trash2, Plus, MoveUp, MoveDown } from 'lucide-react'
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { WorkflowNode, WorkflowEdge } from '@/hooks/use-workflows';
+import { Trash2, Plus, MoveUp, MoveDown } from 'lucide-react';
 
 interface NodeEditorProps {
-  nodes: WorkflowNode[]
-  edges: WorkflowEdge[]
-  onAddNode: (type: WorkflowNode['type']) => void
-  onUpdateNode: (nodeId: string, config: Record<string, any>) => void
-  onDeleteNode: (nodeId: string) => void
-  onAddEdge: (edge: Omit<WorkflowEdge, 'id'>) => void
-  onDeleteEdge: (edgeId: string) => void
-  onMoveNode?: (index: number, direction: 'up' | 'down') => void
+  nodes: WorkflowNode[];
+  edges: WorkflowEdge[];
+  onAddNode: (type: WorkflowNode['type']) => void;
+  onUpdateNode: (nodeId: string, config: Record<string, any>) => void;
+  onDeleteNode: (nodeId: string) => void;
+  onAddEdge: (edge: Omit<WorkflowEdge, 'id'>) => void;
+  onDeleteEdge: (edgeId: string) => void;
+  onMoveNode?: (index: number, direction: 'up' | 'down') => void;
 }
 
 export function NodeEditor({
@@ -32,8 +38,8 @@ export function NodeEditor({
   onDeleteEdge,
   onMoveNode,
 }: NodeEditorProps) {
-  const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null)
-  const [edgeSource, setEdgeSource] = useState<string>('')
+  const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null);
+  const [edgeSource, setEdgeSource] = useState<string>('');
 
   const nodeTypes: { type: WorkflowNode['type']; label: string; color: string }[] = [
     { type: 'start', label: '开始', color: 'bg-green-500' },
@@ -42,21 +48,21 @@ export function NodeEditor({
     { type: 'condition', label: '条件', color: 'bg-yellow-500' },
     { type: 'end', label: '结束', color: 'bg-red-500' },
     { type: 'tool', label: '工具', color: 'bg-orange-500' },
-  ]
+  ];
 
   const handleNodeConfigChange = (key: string, value: any) => {
-    if (!selectedNode) return
+    if (!selectedNode) return;
     const newConfig = {
       ...selectedNode.config,
       [key]: value,
-    }
-    console.log('Updating node config:', selectedNode.id, newConfig)
-    onUpdateNode(selectedNode.id, newConfig)
+    };
+    console.log('Updating node config:', selectedNode.id, newConfig);
+    onUpdateNode(selectedNode.id, newConfig);
     setSelectedNode({
       ...selectedNode,
       config: newConfig,
-    })
-  }
+    });
+  };
 
   return (
     <div className="grid grid-cols-3 gap-6">
@@ -73,9 +79,9 @@ export function NodeEditor({
                 variant="outline"
                 className="justify-start"
                 onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  onAddNode(type)
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onAddNode(type);
                 }}
               >
                 <span className={`w-2 h-2 rounded-full ${color} mr-2`} />
@@ -93,16 +99,18 @@ export function NodeEditor({
                   selectedNode?.id === node.id ? 'bg-muted' : ''
                 }`}
                 onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  console.log('Selecting node:', node.id, node.config)
-                  setSelectedNode(node)
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Selecting node:', node.id, node.config);
+                  setSelectedNode(node);
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${
-                    nodeTypes.find(t => t.type === node.type)?.color
-                  }`} />
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      nodeTypes.find((t) => t.type === node.type)?.color
+                    }`}
+                  />
                   <span className="text-sm">{node.config.name || node.type}</span>
                 </div>
                 <div className="flex gap-1">
@@ -112,10 +120,10 @@ export function NodeEditor({
                     size="icon"
                     className="h-6 w-6"
                     onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
+                      e.preventDefault();
+                      e.stopPropagation();
                       if (index > 0 && onMoveNode) {
-                        onMoveNode(index, 'up')
+                        onMoveNode(index, 'up');
                       }
                     }}
                     disabled={index === 0}
@@ -128,10 +136,10 @@ export function NodeEditor({
                     size="icon"
                     className="h-6 w-6"
                     onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
+                      e.preventDefault();
+                      e.stopPropagation();
                       if (index < nodes.length - 1 && onMoveNode) {
-                        onMoveNode(index, 'down')
+                        onMoveNode(index, 'down');
                       }
                     }}
                     disabled={index === nodes.length - 1}
@@ -144,10 +152,10 @@ export function NodeEditor({
                     size="icon"
                     className="h-6 w-6 text-destructive"
                     onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      onDeleteNode(node.id)
-                      if (selectedNode?.id === node.id) setSelectedNode(null)
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onDeleteNode(node.id);
+                      if (selectedNode?.id === node.id) setSelectedNode(null);
                     }}
                   >
                     <Trash2 className="h-3 w-3" />
@@ -165,23 +173,23 @@ export function NodeEditor({
                 className="flex items-center justify-between p-2 rounded-md border text-sm"
               >
                 <span>
-                  {nodes.find(n => n.id === edge.source)?.config.name || edge.source}
+                  {nodes.find((n) => n.id === edge.source)?.config.name || edge.source}
                   {' -> '}
-                  {nodes.find(n => n.id === edge.target)?.config.name || edge.target}
+                  {nodes.find((n) => n.id === edge.target)?.config.name || edge.target}
                 </span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-destructive"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        onDeleteEdge(edge.id)
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-destructive"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDeleteEdge(edge.id);
+                  }}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
               </div>
             ))}
           </div>
@@ -236,7 +244,9 @@ export function NodeEditor({
                           min="0"
                           max="2"
                           value={selectedNode.config.temperature || 0.7}
-                          onChange={(e) => handleNodeConfigChange('temperature', parseFloat(e.target.value))}
+                          onChange={(e) =>
+                            handleNodeConfigChange('temperature', parseFloat(e.target.value))
+                          }
                         />
                       </div>
                       <div className="space-y-2">
@@ -244,7 +254,9 @@ export function NodeEditor({
                         <Input
                           type="number"
                           value={selectedNode.config.maxTokens || 2048}
-                          onChange={(e) => handleNodeConfigChange('maxTokens', parseInt(e.target.value))}
+                          onChange={(e) =>
+                            handleNodeConfigChange('maxTokens', parseInt(e.target.value))
+                          }
                         />
                       </div>
                     </div>
@@ -311,7 +323,7 @@ export function NodeEditor({
                       value={JSON.stringify(selectedNode.config.outputs || [], null, 2)}
                       onChange={(e) => {
                         try {
-                          handleNodeConfigChange('outputs', JSON.parse(e.target.value))
+                          handleNodeConfigChange('outputs', JSON.parse(e.target.value));
                         } catch {}
                       }}
                       rows={4}
@@ -353,7 +365,7 @@ export function NodeEditor({
                         value={JSON.stringify(selectedNode.config.params, null, 2)}
                         onChange={(e) => {
                           try {
-                            handleNodeConfigChange('params', JSON.parse(e.target.value))
+                            handleNodeConfigChange('params', JSON.parse(e.target.value));
                           } catch (e) {
                             // 忽略 JSON 解析错误
                           }
@@ -434,7 +446,7 @@ export function NodeEditor({
                       </SelectTrigger>
                       <SelectContent>
                         {nodes
-                          .filter(n => n.id !== selectedNode.id)
+                          .filter((n) => n.id !== selectedNode.id)
                           .map((node) => (
                             <SelectItem key={node.id} value={node.id}>
                               {node.config.name || node.type}
@@ -449,8 +461,8 @@ export function NodeEditor({
                           onAddEdge({
                             source: selectedNode.id,
                             target: edgeSource,
-                          })
-                          setEdgeSource('')
+                          });
+                          setEdgeSource('');
                         }
                       }}
                       disabled={!edgeSource}
@@ -464,7 +476,7 @@ export function NodeEditor({
                 <div className="space-y-2">
                   <Label>输出边</Label>
                   {edges
-                    .filter(e => e.source === selectedNode.id)
+                    .filter((e) => e.source === selectedNode.id)
                     .map((edge) => (
                       <div
                         key={edge.id}
@@ -472,7 +484,7 @@ export function NodeEditor({
                       >
                         <span>
                           {'-> '}
-                          {nodes.find(n => n.id === edge.target)?.config.name || edge.target}
+                          {nodes.find((n) => n.id === edge.target)?.config.name || edge.target}
                         </span>
                         <div className="flex gap-2">
                           <Input
@@ -489,9 +501,9 @@ export function NodeEditor({
                             size="icon"
                             className="h-8 w-8 text-destructive"
                             onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              onDeleteEdge(edge.id)
+                              e.preventDefault();
+                              e.stopPropagation();
+                              onDeleteEdge(edge.id);
                             }}
                           >
                             <Trash2 className="h-3 w-3" />
@@ -503,12 +515,10 @@ export function NodeEditor({
               </TabsContent>
             </Tabs>
           ) : (
-            <p className="text-muted-foreground text-center py-8">
-              选择一个节点进行配置
-            </p>
+            <p className="text-muted-foreground text-center py-8">选择一个节点进行配置</p>
           )}
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

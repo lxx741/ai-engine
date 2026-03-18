@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useWorkflows, useDeleteWorkflow, Workflow } from '@/hooks/use-workflows'
-import { useApps } from '@/hooks/use-apps'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
+import { useState } from 'react';
+import { useWorkflows, useDeleteWorkflow, Workflow } from '@/hooks/use-workflows';
+import { useApps } from '@/hooks/use-apps';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -13,56 +13,57 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Trash2, Play, Edit, Search } from 'lucide-react'
+} from '@/components/ui/select';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Trash2, Play, Edit, Search } from 'lucide-react';
 
 export default function WorkflowsPage() {
-  const router = useRouter()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  
-  const { data: workflows, isLoading } = useWorkflows()
-  const { data: apps } = useApps()
-  const deleteWorkflow = useDeleteWorkflow()
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  const { data: workflows, isLoading } = useWorkflows();
+  const { data: apps } = useApps();
+  const deleteWorkflow = useDeleteWorkflow();
 
   const filteredWorkflows = workflows?.filter((workflow) => {
-    const matchesSearch = workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      workflow.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || workflow.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+    const matchesSearch =
+      workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      workflow.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || workflow.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const handleDelete = async (id: string) => {
     if (confirm('确定要删除这个工作流吗？')) {
       try {
-        await deleteWorkflow.mutateAsync(id)
+        await deleteWorkflow.mutateAsync(id);
       } catch (error) {
-        console.error('删除失败:', error)
+        console.error('删除失败:', error);
       }
     }
-  }
+  };
 
   const getStatusBadge = (status: Workflow['status']) => {
     switch (status) {
       case 'draft':
-        return <Badge variant="secondary">草稿</Badge>
+        return <Badge variant="secondary">草稿</Badge>;
       case 'published':
-        return <Badge variant="success">已发布</Badge>
+        return <Badge variant="success">已发布</Badge>;
       case 'archived':
-        return <Badge variant="outline">已归档</Badge>
+        return <Badge variant="outline">已归档</Badge>;
       default:
-        return <Badge>{status}</Badge>
+        return <Badge>{status}</Badge>;
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -71,7 +72,7 @@ export default function WorkflowsPage() {
           <p className="text-muted-foreground">加载中...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -124,7 +125,9 @@ export default function WorkflowsPage() {
           {filteredWorkflows?.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                {searchTerm || statusFilter !== 'all' ? '没有找到匹配的工作流' : '暂无工作流，创建一个吧！'}
+                {searchTerm || statusFilter !== 'all'
+                  ? '没有找到匹配的工作流'
+                  : '暂无工作流，创建一个吧！'}
               </TableCell>
             </TableRow>
           ) : (
@@ -135,12 +138,8 @@ export default function WorkflowsPage() {
                   {workflow.description || '-'}
                 </TableCell>
                 <TableCell>{getStatusBadge(workflow.status)}</TableCell>
-                <TableCell>
-                  {new Date(workflow.createdAt).toLocaleDateString('zh-CN')}
-                </TableCell>
-                <TableCell>
-                  {new Date(workflow.updatedAt).toLocaleDateString('zh-CN')}
-                </TableCell>
+                <TableCell>{new Date(workflow.createdAt).toLocaleDateString('zh-CN')}</TableCell>
+                <TableCell>{new Date(workflow.updatedAt).toLocaleDateString('zh-CN')}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button
@@ -151,11 +150,7 @@ export default function WorkflowsPage() {
                     >
                       <Play className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                    >
+                    <Button variant="outline" size="sm" asChild>
                       <Link href={`/workflows/${workflow.id}/edit`}>
                         <Edit className="h-4 w-4" />
                       </Link>
@@ -176,5 +171,5 @@ export default function WorkflowsPage() {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

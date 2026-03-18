@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { Tool } from '@/hooks/use-tools'
+import { Tool } from '@/hooks/use-tools';
 import {
   Table,
   TableBody,
@@ -8,27 +8,23 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import Link from 'next/link'
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 interface ToolListProps {
-  tools: Tool[]
-  isLoading?: boolean
+  tools: Tool[];
+  isLoading?: boolean;
 }
 
 export function ToolList({ tools, isLoading }: ToolListProps) {
   if (isLoading) {
-    return <div className="text-center py-12">加载中...</div>
+    return <div className="text-center py-12">加载中...</div>;
   }
 
   if (!tools || tools.length === 0) {
-    return (
-      <div className="text-center py-12 text-gray-500">
-        暂无工具
-      </div>
-    )
+    return <div className="text-center py-12 text-gray-500">暂无工具</div>;
   }
 
   return (
@@ -46,9 +42,7 @@ export function ToolList({ tools, isLoading }: ToolListProps) {
         {tools.map((tool) => (
           <TableRow key={tool.name}>
             <TableCell className="font-medium">{tool.name}</TableCell>
-            <TableCell className="max-w-md truncate">
-              {tool.description || '-'}
-            </TableCell>
+            <TableCell className="max-w-md truncate">{tool.description || '-'}</TableCell>
             <TableCell>
               {tool.parameters?.properties ? (
                 <Badge variant="secondary">
@@ -72,5 +66,5 @@ export function ToolList({ tools, isLoading }: ToolListProps) {
         ))}
       </TableBody>
     </Table>
-  )
+  );
 }

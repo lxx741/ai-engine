@@ -2,9 +2,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <h1 className="text-4xl font-bold mb-4">AI Engine</h1>
-      <p className="text-xl text-muted-foreground">
-        Enterprise AI Application Platform
-      </p>
+      <p className="text-xl text-muted-foreground">Enterprise AI Application Platform</p>
       <div className="mt-8 flex gap-4 flex-wrap justify-center">
         <a
           href="/apps"
@@ -38,5 +36,5 @@ export default function Home() {
         </a>
       </div>
     </main>
-  )
+  );
 }

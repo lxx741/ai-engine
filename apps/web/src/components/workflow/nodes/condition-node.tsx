@@ -1,12 +1,12 @@
-import { NodeProps } from '@xyflow/react'
-import { memo } from 'react'
-import { GitBranch } from 'lucide-react'
-import { BaseNode, BaseNodeData, NODE_TYPES } from './base-node'
+import { NodeProps } from '@xyflow/react';
+import { memo } from 'react';
+import { GitBranch } from 'lucide-react';
+import { BaseNode, BaseNodeData, NODE_TYPES } from './base-node';
 
 export type ConditionNodeData = BaseNodeData & {
-  expression?: string
-  branches?: Array<{ label: string; condition: string }>
-}
+  expression?: string;
+  branches?: Array<{ label: string; condition: string }>;
+};
 
 export const ConditionNode = memo(function ConditionNode(props: NodeProps) {
   return (
@@ -17,5 +17,5 @@ export const ConditionNode = memo(function ConditionNode(props: NodeProps) {
       gradientFrom={NODE_TYPES.condition.gradientFrom}
       gradientTo={NODE_TYPES.condition.gradientTo}
     />
-  )
-})
+  );
+});

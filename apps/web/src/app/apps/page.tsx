@@ -1,21 +1,19 @@
-'use client'
+'use client';
 
-import { useApps } from '@/hooks/use-apps'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import Link from 'next/link'
+import { useApps } from '@/hooks/use-apps';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
 
 export default function AppsPage() {
-  const { data: apps, isLoading, error } = useApps()
+  const { data: apps, isLoading, error } = useApps();
 
   if (error) {
     return (
       <div className="container mx-auto p-6">
-        <div className="text-center text-red-500">
-          加载失败：{error.message}
-        </div>
+        <div className="text-center text-red-500">加载失败：{error.message}</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -37,9 +35,7 @@ export default function AppsPage() {
                 <Link href={`/apps/${app.id}`}>
                   <CardTitle className="text-xl">{app.name}</CardTitle>
                 </Link>
-                <CardDescription>
-                  {app.description || '暂无描述'}
-                </CardDescription>
+                <CardDescription>{app.description || '暂无描述'}</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-500">
@@ -58,5 +54,5 @@ export default function AppsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

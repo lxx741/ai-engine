@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   Background,
@@ -12,21 +12,14 @@ import {
   Connection,
   Edge,
   Node,
-} from '@xyflow/react'
-import '@xyflow/react/dist/style.css'
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
 
-import { useCanvasStore } from './canvas-provider'
-import { Sidebar } from './sidebar'
-import { ConfigPanel } from './config-panel'
-import { WorkflowToolbar } from './workflow-toolbar'
-import {
-  StartNode,
-  LLMNode,
-  HTTPNode,
-  ConditionNode,
-  EndNode,
-  ToolNode,
-} from './nodes'
+import { useCanvasStore } from './canvas-provider';
+import { Sidebar } from './sidebar';
+import { ConfigPanel } from './config-panel';
+import { WorkflowToolbar } from './workflow-toolbar';
+import { StartNode, LLMNode, HTTPNode, ConditionNode, EndNode, ToolNode } from './nodes';
 
 // Register custom node types
 const nodeTypes = {
@@ -36,26 +29,26 @@ const nodeTypes = {
   condition: ConditionNode,
   end: EndNode,
   tool: ToolNode,
-}
+};
 
 interface CanvasEditorProps {
-  initialNodes?: Node[]
-  initialEdges?: Edge[]
-  onSubmit?: (data: any) => void
-  onCancel?: () => void
+  initialNodes?: Node[];
+  initialEdges?: Edge[];
+  onSubmit?: (data: any) => void;
+  onCancel?: () => void;
 }
 
-export function CanvasEditor({ 
-  initialNodes = [], 
+export function CanvasEditor({
+  initialNodes = [],
   initialEdges = [],
   onSubmit,
   onCancel,
 }: CanvasEditorProps) {
-  const { 
-    nodes, 
-    edges, 
-    setNodes, 
-    setEdges, 
+  const {
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
     addEdge: addEdgeToStore,
     selectedNode,
     selectedEdge,
@@ -66,41 +59,41 @@ export function CanvasEditor({
     deleteNode,
     updateEdge,
     deleteEdge,
-  } = useCanvasStore()
+  } = useCanvasStore();
 
   // Initialize from props if provided
   useEffect(() => {
     if (initialNodes.length > 0) {
-      setNodes(initialNodes)
+      setNodes(initialNodes);
     }
     if (initialEdges.length > 0) {
-      setEdges(initialEdges)
+      setEdges(initialEdges);
     }
-  }, [initialNodes, initialEdges, setNodes, setEdges])
+  }, [initialNodes, initialEdges, setNodes, setEdges]);
 
   // Handle node changes (position updates, etc.)
   const onNodesChange = useCallback(
     (changes: any[]) => {
       changes.forEach((change) => {
         if (change.type === 'position' && change.position) {
-          updateNode(change.id, { position: change.position })
+          updateNode(change.id, { position: change.position });
         }
-      })
+      });
     },
     [updateNode]
-  )
+  );
 
   // Handle edge changes
   const onEdgesChange = useCallback(
     (changes: any[]) => {
       changes.forEach((change) => {
         if (change.type === 'remove') {
-          deleteEdge(change.id)
+          deleteEdge(change.id);
         }
-      })
+      });
     },
     [deleteEdge]
-  )
+  );
 
   // Handle new edge creation
   const onConnect = useCallback(
@@ -109,63 +102,60 @@ export function CanvasEditor({
         ...connection,
         id: `edge_${Date.now()}`,
         type: 'default',
-      }
-      addEdgeToStore(edge)
+      };
+      addEdgeToStore(edge);
     },
     [addEdgeToStore]
-  )
+  );
 
   // Handle node selection
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      setSelectedNode(node.id)
+      setSelectedNode(node.id);
     },
     [setSelectedNode]
-  )
+  );
 
   // Handle edge selection
   const onEdgeClick = useCallback(
     (_: React.MouseEvent, edge: Edge) => {
-      setSelectedEdge(edge.id)
+      setSelectedEdge(edge.id);
     },
     [setSelectedEdge]
-  )
+  );
 
   // Handle pane click (deselect)
   const onPaneClick = useCallback(() => {
-    clearSelection()
-  }, [clearSelection])
+    clearSelection();
+  }, [clearSelection]);
 
   // Handle node deletion (keyboard shortcut)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.key === 'Delete' || e.key === 'Backspace') && !isInputFocused()) {
         if (selectedNode) {
-          deleteNode(selectedNode)
+          deleteNode(selectedNode);
         }
         if (selectedEdge) {
-          deleteEdge(selectedEdge)
+          deleteEdge(selectedEdge);
         }
       }
-    }
+    };
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedNode, selectedEdge, deleteNode, deleteEdge])
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedNode, selectedEdge, deleteNode, deleteEdge]);
 
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
-      <WorkflowToolbar 
-        onSubmit={onSubmit}
-        onCancel={onCancel}
-      />
-      
+      <WorkflowToolbar onSubmit={onSubmit} onCancel={onCancel} />
+
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar - Node Palette */}
         <Sidebar />
-        
+
         {/* Canvas */}
         <div className="flex-1 h-full">
           <ReactFlow
@@ -188,7 +178,7 @@ export function CanvasEditor({
           >
             <Background color="#888" gap={15} />
             <Controls />
-            <MiniMap 
+            <MiniMap
               nodeStrokeColor={(n) => {
                 const colors: Record<string, string> = {
                   start: '#10b981',
@@ -197,8 +187,8 @@ export function CanvasEditor({
                   condition: '#f59e0b',
                   end: '#f43f5e',
                   tool: '#f97316',
-                }
-                return colors[n.type || 'default'] || '#64748b'
+                };
+                return colors[n.type || 'default'] || '#64748b';
               }}
               nodeColor={(n) => {
                 const colors: Record<string, string> = {
@@ -208,32 +198,29 @@ export function CanvasEditor({
                   condition: '#fef3c7',
                   end: '#ffe4e6',
                   tool: '#ffedd5',
-                }
-                return colors[n.type || 'default'] || '#f1f5f9'
+                };
+                return colors[n.type || 'default'] || '#f1f5f9';
               }}
               className="bg-white border rounded-lg shadow-lg"
             />
           </ReactFlow>
         </div>
-        
+
         {/* Config Panel */}
         {selectedNode && (
-          <ConfigPanel 
-            nodeId={selectedNode}
-            onClose={() => setSelectedNode(undefined)}
-          />
+          <ConfigPanel nodeId={selectedNode} onClose={() => setSelectedNode(undefined)} />
         )}
       </div>
     </div>
-  )
+  );
 }
 
 // Helper to check if focus is in an input field
 function isInputFocused(): boolean {
-  const activeElement = document.activeElement
+  const activeElement = document.activeElement;
   return (
     activeElement?.tagName === 'INPUT' ||
     activeElement?.tagName === 'TEXTAREA' ||
     activeElement?.tagName === 'SELECT'
-  )
+  );
 }

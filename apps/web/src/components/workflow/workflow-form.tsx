@@ -1,67 +1,77 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Workflow, WorkflowNode, WorkflowEdge } from '@/hooks/use-workflows'
-import { NodeEditor } from './node-editor'
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Workflow, WorkflowNode, WorkflowEdge } from '@/hooks/use-workflows';
+import { NodeEditor } from './node-editor';
 
 interface WorkflowFormProps {
-  workflow?: Workflow
-  apps?: any[]
-  onSubmit: (data: Partial<Workflow>) => void
-  onCancel: () => void
+  workflow?: Workflow;
+  apps?: any[];
+  onSubmit: (data: Partial<Workflow>) => void;
+  onCancel: () => void;
 }
 
 export function WorkflowForm({ workflow, apps, onSubmit, onCancel }: WorkflowFormProps) {
-  const [name, setName] = useState(workflow?.name || '')
-  const [description, setDescription] = useState(workflow?.description || '')
-  const [appId, setAppId] = useState(workflow?.appId || apps?.[0]?.id || '')
-  const [status, setStatus] = useState<'draft' | 'published' | 'archived'>(workflow?.status || 'draft')
-  const [definition, setDefinition] = useState<Workflow['definition']>(workflow?.definition || {
-    nodes: [],
-    edges: [],
-    variables: {},
-  })
-  const [activeTab, setActiveTab] = useState<'basic' | 'nodes' | 'preview'>('basic')
+  const [name, setName] = useState(workflow?.name || '');
+  const [description, setDescription] = useState(workflow?.description || '');
+  const [appId, setAppId] = useState(workflow?.appId || apps?.[0]?.id || '');
+  const [status, setStatus] = useState<'draft' | 'published' | 'archived'>(
+    workflow?.status || 'draft'
+  );
+  const [definition, setDefinition] = useState<Workflow['definition']>(
+    workflow?.definition || {
+      nodes: [],
+      edges: [],
+      variables: {},
+    }
+  );
+  const [activeTab, setActiveTab] = useState<'basic' | 'nodes' | 'preview'>('basic');
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     // Validate definition structure
     const validDefinition = {
       nodes: Array.isArray(definition.nodes) ? definition.nodes : [],
       edges: Array.isArray(definition.edges) ? definition.edges : [],
       variables: definition.variables || {},
-    }
-    
+    };
+
     console.log('Submitting workflow:', {
       name,
       description,
       status,
       definition: validDefinition,
-    })
-    
+    });
+
     // 创建工作流时需要 appId，更新时不需要
     const submitData: any = {
       name,
       description,
       status,
       definition: validDefinition,
-    }
-    
+    };
+
     // 如果是创建模式（没有 workflow prop），添加 appId
     if (!workflow && appId) {
-      submitData.appId = appId
+      submitData.appId = appId;
     }
-    
-    onSubmit(submitData)
-  }
+
+    onSubmit(submitData);
+  };
 
   const handleAddNode = (type: WorkflowNode['type']) => {
     const newNode: WorkflowNode = {
@@ -69,65 +79,63 @@ export function WorkflowForm({ workflow, apps, onSubmit, onCancel }: WorkflowFor
       type,
       config: getDefaultNodeConfig(type),
       position: { x: 100, y: 100 },
-    }
-    setDefinition(prev => ({
+    };
+    setDefinition((prev) => ({
       ...prev,
       nodes: [...prev.nodes, newNode],
-    }))
-  }
+    }));
+  };
 
   const handleUpdateNode = (nodeId: string, config: Record<string, any>) => {
-    setDefinition(prev => ({
+    setDefinition((prev) => ({
       ...prev,
-      nodes: prev.nodes.map(node => 
-        node.id === nodeId ? { ...node, config } : node
-      ),
-    }))
-  }
+      nodes: prev.nodes.map((node) => (node.id === nodeId ? { ...node, config } : node)),
+    }));
+  };
 
   const handleDeleteNode = (nodeId: string) => {
-    setDefinition(prev => ({
+    setDefinition((prev) => ({
       ...prev,
-      nodes: prev.nodes.filter(node => node.id !== nodeId),
-      edges: prev.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId),
-    }))
-  }
+      nodes: prev.nodes.filter((node) => node.id !== nodeId),
+      edges: prev.edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+    }));
+  };
 
   const handleMoveNode = (index: number, direction: 'up' | 'down') => {
-    setDefinition(prev => ({
+    setDefinition((prev) => ({
       ...prev,
       nodes: prev.nodes.map((node, i) => {
         if (direction === 'up' && i === index - 1) {
-          return prev.nodes[index]
+          return prev.nodes[index];
         }
         if (direction === 'down' && i === index + 1) {
-          return prev.nodes[index]
+          return prev.nodes[index];
         }
         if (i === index) {
-          return direction === 'up' ? prev.nodes[index - 1] : prev.nodes[index + 1]
+          return direction === 'up' ? prev.nodes[index - 1] : prev.nodes[index + 1];
         }
-        return node
+        return node;
       }),
-    }))
-  }
+    }));
+  };
 
   const handleAddEdge = (edge: Omit<WorkflowEdge, 'id'>) => {
     const newEdge: WorkflowEdge = {
       ...edge,
       id: `edge_${Date.now()}`,
-    }
-    setDefinition(prev => ({
+    };
+    setDefinition((prev) => ({
       ...prev,
       edges: [...prev.edges, newEdge],
-    }))
-  }
+    }));
+  };
 
   const handleDeleteEdge = (edgeId: string) => {
-    setDefinition(prev => ({
+    setDefinition((prev) => ({
       ...prev,
-      edges: prev.edges.filter(edge => edge.id !== edgeId),
-    }))
-  }
+      edges: prev.edges.filter((edge) => edge.id !== edgeId),
+    }));
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -248,12 +256,10 @@ export function WorkflowForm({ workflow, apps, onSubmit, onCancel }: WorkflowFor
         <Button type="button" variant="outline" onClick={onCancel}>
           取消
         </Button>
-        <Button type="submit">
-          {workflow ? '更新工作流' : '创建工作流'}
-        </Button>
+        <Button type="submit">{workflow ? '更新工作流' : '创建工作流'}</Button>
       </div>
     </form>
-  )
+  );
 }
 
 function getDefaultNodeConfig(type: WorkflowNode['type']): Record<string, any> {
@@ -262,7 +268,7 @@ function getDefaultNodeConfig(type: WorkflowNode['type']): Record<string, any> {
       return {
         name: '开始节点',
         outputs: [{ name: 'output', type: 'string' }],
-      }
+      };
     case 'llm':
       return {
         name: 'LLM 节点',
@@ -270,7 +276,7 @@ function getDefaultNodeConfig(type: WorkflowNode['type']): Record<string, any> {
         prompt: '',
         temperature: 0.7,
         maxTokens: 2048,
-      }
+      };
     case 'http':
       return {
         name: 'HTTP 请求',
@@ -278,24 +284,24 @@ function getDefaultNodeConfig(type: WorkflowNode['type']): Record<string, any> {
         url: '',
         headers: {},
         body: '',
-      }
+      };
     case 'condition':
       return {
         name: '条件判断',
         conditions: [],
-      }
+      };
     case 'end':
       return {
         name: '结束节点',
         outputs: [{ name: 'result', value: '' }],
-      }
+      };
     case 'tool':
       return {
         name: '工具节点',
         toolName: '',
         params: {},
-      }
+      };
     default:
-      return { name: '未命名节点' }
+      return { name: '未命名节点' };
   }
 }

@@ -1,11 +1,11 @@
-import { NodeProps } from '@xyflow/react'
-import { memo } from 'react'
-import { Play } from 'lucide-react'
-import { BaseNode, BaseNodeData, NODE_TYPES } from './base-node'
+import { NodeProps } from '@xyflow/react';
+import { memo } from 'react';
+import { Play } from 'lucide-react';
+import { BaseNode, BaseNodeData, NODE_TYPES } from './base-node';
 
 export type StartNodeData = BaseNodeData & {
-  outputs?: Array<{ name: string; type: string }>
-}
+  outputs?: Array<{ name: string; type: string }>;
+};
 
 export const StartNode = memo(function StartNode(props: NodeProps) {
   return (
@@ -16,5 +16,5 @@ export const StartNode = memo(function StartNode(props: NodeProps) {
       gradientFrom={NODE_TYPES.start.gradientFrom}
       gradientTo={NODE_TYPES.start.gradientTo}
     />
-  )
-})
+  );
+});

@@ -1,60 +1,62 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useCanvasStore } from './canvas-provider'
+import { useState } from 'react';
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useCanvasStore } from './canvas-provider';
 
 interface ConfigPanelProps {
-  nodeId: string
-  onClose: () => void
+  nodeId: string;
+  onClose: () => void;
 }
 
 export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
-  const { nodes, updateNodeConfig, deleteNode } = useCanvasStore()
-  
-  const node = nodes.find(n => n.id === nodeId)
-  if (!node) return null
+  const { nodes, updateNodeConfig, deleteNode } = useCanvasStore();
 
-  const nodeData = node.data as any
-  
-  const [config, setConfig] = useState(nodeData.config || {})
+  const node = nodes.find((n) => n.id === nodeId);
+  if (!node) return null;
+
+  const nodeData = node.data as any;
+
+  const [config, setConfig] = useState(nodeData.config || {});
 
   const handleConfigChange = (key: string, value: any) => {
-    const newConfig = { ...config, [key]: value }
-    setConfig(newConfig)
-    updateNodeConfig(nodeId, newConfig)
-  }
+    const newConfig = { ...config, [key]: value };
+    setConfig(newConfig);
+    updateNodeConfig(nodeId, newConfig);
+  };
 
   const handleDelete = () => {
     if (confirm('确定要删除这个节点吗？')) {
-      deleteNode(nodeId)
-      onClose()
+      deleteNode(nodeId);
+      onClose();
     }
-  }
+  };
 
   return (
     <div className="w-96 bg-white border-l shadow-lg overflow-y-auto">
       <div className="p-4 border-b flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">
-            {nodeData.name || node.type}
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            {node.type} 节点
-          </p>
+          <h2 className="text-lg font-semibold">{nodeData.name || node.type}</h2>
+          <p className="text-xs text-muted-foreground">{node.type} 节点</p>
         </div>
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="w-4 h-4" />
         </Button>
       </div>
-      
+
       <div className="p-4 space-y-4">
         {/* Basic Info */}
         <Card>
@@ -68,23 +70,23 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                 id="node-name"
                 value={nodeData.name || ''}
                 onChange={(e) => {
-                  const newConfig = { ...config, name: e.target.value }
-                  setConfig(newConfig)
-                  updateNodeConfig(nodeId, newConfig)
+                  const newConfig = { ...config, name: e.target.value };
+                  setConfig(newConfig);
+                  updateNodeConfig(nodeId, newConfig);
                 }}
                 placeholder="输入节点名称"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="node-desc">描述</Label>
               <Textarea
                 id="node-desc"
                 value={nodeData.description || ''}
                 onChange={(e) => {
-                  const newConfig = { ...config, description: e.target.value }
-                  setConfig(newConfig)
-                  updateNodeConfig(nodeId, newConfig)
+                  const newConfig = { ...config, description: e.target.value };
+                  setConfig(newConfig);
+                  updateNodeConfig(nodeId, newConfig);
                 }}
                 placeholder="输入节点描述"
                 rows={2}
@@ -96,10 +98,14 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
         {/* Type-specific Config */}
         <Tabs defaultValue="config">
           <TabsList className="w-full">
-            <TabsTrigger value="config" className="flex-1">配置</TabsTrigger>
-            <TabsTrigger value="advanced" className="flex-1">高级</TabsTrigger>
+            <TabsTrigger value="config" className="flex-1">
+              配置
+            </TabsTrigger>
+            <TabsTrigger value="advanced" className="flex-1">
+              高级
+            </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="config" className="space-y-4 mt-4">
             {node.type === 'llm' && (
               <>
@@ -111,7 +117,7 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                     placeholder="qwen-turbo"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>提示词</Label>
                   <Textarea
@@ -121,7 +127,7 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                     rows={6}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Temperature</Label>
@@ -131,7 +137,9 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                       min="0"
                       max="2"
                       value={config.temperature || 0.7}
-                      onChange={(e) => handleConfigChange('temperature', parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        handleConfigChange('temperature', parseFloat(e.target.value))
+                      }
                     />
                   </div>
                   <div className="space-y-2">
@@ -145,7 +153,7 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                 </div>
               </>
             )}
-            
+
             {node.type === 'http' && (
               <>
                 <div className="grid grid-cols-2 gap-4">
@@ -175,7 +183,7 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>请求体 (JSON)</Label>
                   <Textarea
@@ -187,7 +195,7 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                 </div>
               </>
             )}
-            
+
             {node.type === 'condition' && (
               <div className="space-y-2">
                 <Label>条件表达式</Label>
@@ -202,7 +210,7 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                 </p>
               </div>
             )}
-            
+
             {node.type === 'tool' && (
               <>
                 <div className="space-y-2">
@@ -213,14 +221,14 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                     placeholder="http, code, time"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>工具参数 (JSON)</Label>
                   <Textarea
                     value={JSON.stringify(config.params || {}, null, 2)}
                     onChange={(e) => {
                       try {
-                        handleConfigChange('params', JSON.parse(e.target.value))
+                        handleConfigChange('params', JSON.parse(e.target.value));
                       } catch {}
                     }}
                     rows={8}
@@ -228,7 +236,7 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                 </div>
               </>
             )}
-            
+
             {node.type === 'start' && (
               <div className="space-y-2">
                 <Label>输出变量</Label>
@@ -236,7 +244,7 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                   value={JSON.stringify(config.outputs || [], null, 2)}
                   onChange={(e) => {
                     try {
-                      handleConfigChange('outputs', JSON.parse(e.target.value))
+                      handleConfigChange('outputs', JSON.parse(e.target.value));
                     } catch {}
                   }}
                   rows={6}
@@ -244,7 +252,7 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                 />
               </div>
             )}
-            
+
             {node.type === 'end' && (
               <div className="space-y-2">
                 <Label>最终输出</Label>
@@ -252,7 +260,7 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                   value={JSON.stringify(config.outputs || [], null, 2)}
                   onChange={(e) => {
                     try {
-                      handleConfigChange('outputs', JSON.parse(e.target.value))
+                      handleConfigChange('outputs', JSON.parse(e.target.value));
                     } catch {}
                   }}
                   rows={6}
@@ -261,7 +269,7 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
               </div>
             )}
           </TabsContent>
-          
+
           <TabsContent value="advanced" className="space-y-4 mt-4">
             <div className="space-y-2">
               <Label>超时时间 (秒)</Label>
@@ -271,7 +279,7 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                 onChange={(e) => handleConfigChange('timeout', parseInt(e.target.value))}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label>重试次数</Label>
               <Input
@@ -280,13 +288,9 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                 onChange={(e) => handleConfigChange('retries', parseInt(e.target.value))}
               />
             </div>
-            
+
             <div className="pt-4">
-              <Button
-                variant="destructive"
-                className="w-full"
-                onClick={handleDelete}
-              >
+              <Button variant="destructive" className="w-full" onClick={handleDelete}>
                 删除节点
               </Button>
             </div>
@@ -294,5 +298,5 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
         </Tabs>
       </div>
     </div>
-  )
+  );
 }

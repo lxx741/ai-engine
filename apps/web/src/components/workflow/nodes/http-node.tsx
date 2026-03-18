@@ -1,14 +1,14 @@
-import { NodeProps } from '@xyflow/react'
-import { memo } from 'react'
-import { Globe } from 'lucide-react'
-import { BaseNode, BaseNodeData, NODE_TYPES } from './base-node'
+import { NodeProps } from '@xyflow/react';
+import { memo } from 'react';
+import { Globe } from 'lucide-react';
+import { BaseNode, BaseNodeData, NODE_TYPES } from './base-node';
 
 export type HTTPNodeData = BaseNodeData & {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
-  url?: string
-  headers?: Record<string, string>
-  body?: string
-}
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  url?: string;
+  headers?: Record<string, string>;
+  body?: string;
+};
 
 export const HTTPNode = memo(function HTTPNode(props: NodeProps) {
   return (
@@ -19,5 +19,5 @@ export const HTTPNode = memo(function HTTPNode(props: NodeProps) {
       gradientFrom={NODE_TYPES.http.gradientFrom}
       gradientTo={NODE_TYPES.http.gradientTo}
     />
-  )
-})
+  );
+});

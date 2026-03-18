@@ -1,54 +1,54 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useWorkflow, useRunWorkflow, useWorkflowRuns } from '@/hooks/use-workflows'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Play, ArrowLeft, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useWorkflow, useRunWorkflow, useWorkflowRuns } from '@/hooks/use-workflows';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Play, ArrowLeft, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 export default function RunWorkflowPage() {
-  const router = useRouter()
-  const params = useParams()
-  const workflowId = params.id as string
-  
-  const [input, setInput] = useState<Record<string, any>>({})
-  const [isRunning, setIsRunning] = useState(false)
-  const [expandedRunId, setExpandedRunId] = useState<string | null>(null)
-  
-  const { data: workflow, isLoading } = useWorkflow(workflowId)
-  const runWorkflow = useRunWorkflow()
-  const { data: runs } = useWorkflowRuns(workflowId)
-  const [lastRun, setLastRun] = useState<any>(null)
+  const router = useRouter();
+  const params = useParams();
+  const workflowId = params.id as string;
+
+  const [input, setInput] = useState<Record<string, any>>({});
+  const [isRunning, setIsRunning] = useState(false);
+  const [expandedRunId, setExpandedRunId] = useState<string | null>(null);
+
+  const { data: workflow, isLoading } = useWorkflow(workflowId);
+  const runWorkflow = useRunWorkflow();
+  const { data: runs } = useWorkflowRuns(workflowId);
+  const [lastRun, setLastRun] = useState<any>(null);
 
   const handleRun = async () => {
-    setIsRunning(true)
+    setIsRunning(true);
     try {
-      const result = await runWorkflow.mutateAsync({ id: workflowId, input })
-      setLastRun(result)
+      const result = await runWorkflow.mutateAsync({ id: workflowId, input });
+      setLastRun(result);
     } catch (error: any) {
       setLastRun({
         status: 'failed',
         error: error.message || '执行失败',
-      })
+      });
     } finally {
-      setIsRunning(false)
+      setIsRunning(false);
     }
-  }
+  };
 
   const handleInputChange = (key: string, value: string) => {
-    setInput(prev => ({ ...prev, [key]: value }))
-  }
+    setInput((prev) => ({ ...prev, [key]: value }));
+  };
 
   const toggleExpand = (runId: string) => {
-    setExpandedRunId(expandedRunId === runId ? null : runId)
-  }
+    setExpandedRunId(expandedRunId === runId ? null : runId);
+  };
 
   if (isLoading) {
     return (
@@ -57,7 +57,7 @@ export default function RunWorkflowPage() {
           <p className="text-muted-foreground">加载中...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (!workflow) {
@@ -67,11 +67,11 @@ export default function RunWorkflowPage() {
           <p className="text-muted-foreground">工作流不存在</p>
         </div>
       </div>
-    )
+    );
   }
 
-  const variables = workflow.definition?.variables || {}
-  const variableKeys = Object.keys(variables)
+  const variables = workflow.definition?.variables || {};
+  const variableKeys = Object.keys(variables);
 
   return (
     <div className="container mx-auto p-6 max-w-5xl">
@@ -100,9 +100,7 @@ export default function RunWorkflowPage() {
               <CardHeader>
                 <CardTitle>输入参数</CardTitle>
                 <CardDescription>
-                  {variableKeys.length > 0
-                    ? '填写工作流所需的输入变量'
-                    : '此工作流不需要输入参数'}
+                  {variableKeys.length > 0 ? '填写工作流所需的输入变量' : '此工作流不需要输入参数'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -110,9 +108,7 @@ export default function RunWorkflowPage() {
                   <div key={key} className="space-y-2">
                     <Label htmlFor={key}>
                       {variables[key]?.label || key}
-                      {variables[key]?.required && (
-                        <span className="text-destructive ml-1">*</span>
-                      )}
+                      {variables[key]?.required && <span className="text-destructive ml-1">*</span>}
                     </Label>
                     {variables[key]?.type === 'text' || variables[key]?.type === 'string' ? (
                       <Textarea
@@ -139,11 +135,7 @@ export default function RunWorkflowPage() {
                   </p>
                 )}
 
-                <Button
-                  onClick={handleRun}
-                  disabled={isRunning}
-                  className="w-full"
-                >
+                <Button onClick={handleRun} disabled={isRunning} className="w-full">
                   {isRunning ? (
                     <>
                       <Clock className="h-4 w-4 mr-2 animate-spin" />
@@ -250,15 +242,11 @@ export default function RunWorkflowPage() {
                             </p>
                           </div>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => toggleExpand(run.id)}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => toggleExpand(run.id)}>
                           {expandedRunId === run.id ? '收起' : '查看结果'}
                         </Button>
                       </div>
-                      
+
                       {/* 展开的结果区域 */}
                       {expandedRunId === run.id && (
                         <div className="ml-12 p-4 bg-muted rounded-lg space-y-3">
@@ -271,7 +259,7 @@ export default function RunWorkflowPage() {
                               </pre>
                             </div>
                           )}
-                          
+
                           {/* 输出结果 */}
                           {run.output && (
                             <div className="space-y-2">
@@ -281,14 +269,14 @@ export default function RunWorkflowPage() {
                               </pre>
                             </div>
                           )}
-                          
+
                           {/* 错误信息 */}
                           {run.error && (
                             <div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm">
                               {run.error}
                             </div>
                           )}
-                          
+
                           {/* 无结果提示 */}
                           {!run.output && !run.error && run.status === 'success' && (
                             <div className="text-sm text-muted-foreground">
@@ -310,5 +298,5 @@ export default function RunWorkflowPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

@@ -1,11 +1,11 @@
-import { NodeProps } from '@xyflow/react'
-import { memo } from 'react'
-import { StopCircle } from 'lucide-react'
-import { BaseNode, BaseNodeData, NODE_TYPES } from './base-node'
+import { NodeProps } from '@xyflow/react';
+import { memo } from 'react';
+import { StopCircle } from 'lucide-react';
+import { BaseNode, BaseNodeData, NODE_TYPES } from './base-node';
 
 export type EndNodeData = BaseNodeData & {
-  outputs?: Array<{ name: string; value: string }>
-}
+  outputs?: Array<{ name: string; value: string }>;
+};
 
 export const EndNode = memo(function EndNode(props: NodeProps) {
   return (
@@ -16,5 +16,5 @@ export const EndNode = memo(function EndNode(props: NodeProps) {
       gradientFrom={NODE_TYPES.end.gradientFrom}
       gradientTo={NODE_TYPES.end.gradientTo}
     />
-  )
-})
+  );
+});
