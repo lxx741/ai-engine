@@ -9,10 +9,14 @@ import {
   UndoButton,
   RedoButton,
   AutoLayoutButton,
+  ValidateButton,
+  PreviewButton,
 } from './toolbar-buttons';
 import { TemplateSelector } from './template-selector';
+import { ValidationPanel } from './validation-panel';
 import type { WorkflowTemplate } from './templates';
 import { autoLayout } from '@/lib/auto-layout';
+import { validateWorkflow, getValidationStats } from '@/lib/workflow-validation';
 import type { Node, Edge } from '@xyflow/react';
 import type { WorkflowNode, WorkflowEdge } from '@/hooks/use-workflows';
 
@@ -23,6 +27,8 @@ interface WorkflowToolbarProps {
 
 export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<any[]>([]);
   const {
     workflowName,
     workflowDescription,
@@ -39,6 +45,8 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
     canUndo,
     canRedo,
     autoLayout: layoutCanvas,
+    validate,
+    setSelectedNode,
   } = useCanvasStore();
 
   const handleUndo = () => {
@@ -54,6 +62,17 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
   const handleAutoLayout = () => {
     pushToHistory();
     layoutCanvas('horizontal');
+  };
+
+  const handleValidate = () => {
+    const errors = validate();
+    setValidationErrors(errors);
+    setShowValidation(true);
+  };
+
+  const handleNodeSelect = (nodeId: string) => {
+    setSelectedNode(nodeId);
+    setShowValidation(false);
   };
 
   const handleTemplateSelect = (template: WorkflowTemplate) => {
@@ -252,6 +271,12 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
         <RedoButton onClick={handleRedo} disabled={!canRedo()} title="重做 (Ctrl+Shift+Z)" />
         <AutoLayoutButton onClick={handleAutoLayout} title="自动布局" />
 
+        <ValidateButton
+          onClick={handleValidate}
+          errorCount={getValidationStats(validationErrors).errors}
+          title="验证工作流"
+        />
+
         <Button variant="outline" size="sm" onClick={handleClear} title="清空画布">
           <RotateCcw className="w-4 h-4" />
         </Button>
@@ -350,6 +375,14 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
         <TemplateSelector
           onSelect={handleTemplateSelect}
           onClose={() => setShowTemplateSelector(false)}
+        />
+      )}
+
+      {showValidation && (
+        <ValidationPanel
+          errors={validationErrors}
+          onClose={() => setShowValidation(false)}
+          onNodeSelect={handleNodeSelect}
         />
       )}
     </>

@@ -11,3 +11,7 @@ export { AutoLayoutButton } from './auto-layout-button';
 
 // Variable Picker (Agent 2)
 export { VariablePicker } from '../variable-picker';
+
+// Agent 3: Validation/Preview
+export { ValidateButton } from './validate-button';
+export { PreviewButton } from './preview-button';

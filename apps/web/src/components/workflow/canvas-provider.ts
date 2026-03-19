@@ -64,6 +64,15 @@ interface CanvasState {
 
   // Actions - Auto Layout
   autoLayout: (direction?: 'horizontal' | 'vertical') => void;
+
+  // Actions - Validation
+  validate: () => any[];
+
+  // Actions - Preview/Execution
+  startPreview: () => void;
+  stopPreview: () => void;
+  setNodeStatus: (nodeId: string, status: 'running' | 'success' | 'error') => void;
+  isPreviewRunning: boolean;
 }
 
 const DEFAULT_VIEWPORT: Viewport = { x: 0, y: 0, zoom: 1 };
@@ -370,6 +379,57 @@ export const useCanvasStore = create<CanvasState>()(
           setNodes(rfNodes);
         });
       },
+
+      // Validation action
+      validate: () => {
+        const { nodes, edges } = get();
+        const workflowNodes = nodes.map((n) => ({
+          id: n.id,
+          type: n.type as any,
+          config: (n.data as any)?.config || {},
+          position: n.position,
+        }));
+        const workflowEdges = edges.map((e) => ({
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          condition: (e.data as any)?.condition,
+        }));
+
+        // Dynamic import to avoid circular dependency
+        const { validateWorkflow } = require('@/lib/workflow-validation');
+        return validateWorkflow(workflowNodes, workflowEdges);
+      },
+
+      // Preview/Execution actions
+      startPreview: () => {
+        set({ isPreviewRunning: true });
+      },
+
+      stopPreview: () => {
+        set({ isPreviewRunning: false });
+        // Reset all node statuses
+        const { nodes, setNodes } = get();
+        const resetNodes = nodes.map((n) => ({
+          ...n,
+          data: {
+            ...n.data,
+            status: 'default',
+          },
+        }));
+        setNodes(resetNodes);
+      },
+
+      setNodeStatus: (nodeId, status) => {
+        const { updateNode } = get();
+        updateNode(nodeId, {
+          data: {
+            status,
+          },
+        } as any);
+      },
+
+      isPreviewRunning: false,
     }),
     {
       name: STORAGE_KEY,
