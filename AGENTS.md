@@ -198,3 +198,62 @@ pnpm --filter @ai-engine/server db:seed       # Run seed script
 2. **Add provider:** Implement in `packages/providers/` and register in ProviderFactory
 3. **Add API endpoint:** Create controller method with proper DTO validation
 4. **Database change:** Update schema.prisma, run db:migrate, regenerate client
+
+---
+
+## Multi-Agent Development Configuration
+
+### Hardware Profile
+- **Recommended Concurrent Agents**: Maximum 3 agents (M4 16GB optimized)
+- **Memory per Agent**: ~500MB-1GB RAM
+
+### Zero-Conflict Strategy
+
+**Core Rule**: Agents NEVER modify the same file simultaneously.
+
+**File Isolation Patterns**:
+1. **New Files**: Each agent creates independent files - ✅ Safe for parallel execution
+2. **Shared Components**: Use component isolation pattern (e.g., `toolbar-buttons/` directory)
+3. **Store Actions**: Each agent adds independent actions to shared stores, merge sequentially
+
+### Toolbar Buttons Pattern
+
+To avoid conflicts in shared toolbar files, use isolated button components:
+
+```
+apps/web/src/components/workflow/toolbar-buttons/
+├── index.ts                    # Unified exports
+├── template-library-button.tsx # Agent 1
+├── undo-button.tsx             # Agent 2
+├── redo-button.tsx             # Agent 2
+├── auto-layout-button.tsx      # Agent 2
+├── validate-button.tsx         # Agent 3
+└── preview-button.tsx          # Agent 3
+```
+
+**Usage in workflow-toolbar.tsx**:
+```typescript
+import { TemplateLibraryButton, UndoButton, /* ... */ } from './toolbar-buttons';
+
+// Each agent only imports and uses their own button component
+```
+
+### Git Workflow
+- **Branch Naming**: `feature/{function-name}` (e.g., `feature/templates`, `feature/undo-redo`)
+- **Merge Strategy**: Sequential merge after each agent completes and passes tests
+- **Testing**: Test immediately after each agent completes
+- **Release**: Unified release after all agents complete
+
+### Quality Gates
+
+Before merging each agent's work:
+- [ ] TypeScript compilation passes (`pnpm build`)
+- [ ] ESLint passes (`pnpm lint`)
+- [ ] Prettier formatted (`pnpm exec prettier --write`)
+- [ ] Component tests pass (if applicable)
+
+Before unified release:
+- [ ] Integration tests pass
+- [ ] Manual testing completed
+- [ ] Performance benchmark passes (< 2s for 100+ nodes)
+- [ ] Documentation updated

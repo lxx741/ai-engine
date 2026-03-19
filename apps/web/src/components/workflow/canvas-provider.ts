@@ -48,6 +48,7 @@ interface CanvasState {
   setNodes: (nodes: Node[]) => void;
   setEdges: (edges: Edge[]) => void;
   setDefinition: (definition: WorkflowDefinition) => void;
+  applyTemplate: (nodes: Node[], edges: Edge[], name: string, description?: string) => void;
 
   // Actions - Persistence
   saveToLocalStorage: () => void;
@@ -167,6 +168,14 @@ export const useCanvasStore = create<CanvasState>()(
         set({
           nodes: convertedNodes,
           edges: convertedEdges,
+        });
+      },
+      applyTemplate: (nodes, edges, name, description) => {
+        set({
+          nodes,
+          edges,
+          workflowName: name,
+          workflowDescription: description,
         });
       },
 
