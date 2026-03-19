@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Save, RotateCcw, Download, Upload, Settings, Play } from 'lucide-react';
+import { Save, RotateCcw, Download, Upload, Settings, Play, Trash } from 'lucide-react';
 import { useCanvasStore } from './canvas-provider';
 import {
   TemplateLibraryButton,
@@ -312,9 +312,9 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
             title="验证工作流"
           />
 
-          <Button variant="outline" size="sm" onClick={handleClear} title="清空画布">
-            <RotateCcw className="w-4 h-4" />
-          </Button>
+        <Button variant="outline" size="sm" onClick={handleClear} title="清空画布">
+          <Trash className="w-4 h-4" />
+        </Button>
 
           <Button variant="outline" size="sm" onClick={handleImport} title="导入 JSON">
             <Upload className="w-4 h-4" />
@@ -334,11 +334,11 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
             </Button>
           )}
 
-          {onSubmit ? (
-            <Button variant="default" size="sm" onClick={handleSubmit}>
-              <Play className="w-4 h-4 mr-2" />
-              运行工作流
-            </Button>
+        {onSubmit ? (
+          <Button variant="default" size="sm" onClick={handleSubmit}>
+            <Save className="w-4 h-4 mr-2" />
+            保存并返回
+          </Button>
           ) : (
             <Button variant="default" size="sm" title="测试工作流">
               <Play className="w-4 h-4" />

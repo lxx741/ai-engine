@@ -21,6 +21,12 @@ interface CanvasState {
   workflowName?: string;
   workflowDescription?: string;
 
+  // History state (for undo/redo)
+  history: {
+    past: Array<{ nodes: Node[]; edges: Edge[] }>;
+    future: Array<{ nodes: Node[]; edges: Edge[] }>;
+  };
+
   // Actions - Nodes
   addNode: (node: Node) => void;
   updateNode: (id: string, updates: Partial<Node>) => void;
@@ -90,6 +96,10 @@ export const useCanvasStore = create<CanvasState>()(
       viewport: DEFAULT_VIEWPORT,
       workflowName: undefined,
       workflowDescription: undefined,
+      history: {
+        past: [],
+        future: [],
+      },
 
       // Node actions
       addNode: (node) =>
@@ -237,108 +247,102 @@ export const useCanvasStore = create<CanvasState>()(
 
       // History actions (Undo/Redo)
       pushToHistory: () => {
-        const { nodes, edges } = get();
-        try {
-          const saved = localStorage.getItem('workflow-canvas-history');
-          const history = saved ? JSON.parse(saved) : { past: [], future: [] };
+        const { nodes, edges, history } = get();
+        console.log('[History] Push to history:', {
+          nodesCount: nodes.length,
+          edgesCount: edges.length,
+          pastLength: history.past.length,
+        });
 
-          const newPast = [...history.past, { nodes: [...nodes], edges: [...edges] }];
-          if (newPast.length > 50) {
-            newPast.shift();
-          }
-
-          localStorage.setItem(
-            'workflow-canvas-history',
-            JSON.stringify({
-              past: newPast,
-              future: [],
-            })
-          );
-        } catch (error) {
-          console.error('Failed to push to history:', error);
+        const newPast = [...history.past, { nodes: [...nodes], edges: [...edges] }];
+        if (newPast.length > 50) {
+          newPast.shift();
         }
+
+        set({
+          history: {
+            past: newPast,
+            future: [], // Clear future when new action
+          },
+        });
+
+        console.log('[History] Pushed, new past length:', newPast.length);
       },
 
       undo: () => {
-        try {
-          const saved = localStorage.getItem('workflow-canvas-history');
-          if (!saved) return false;
+        const { history, nodes, edges } = get();
+        console.log('[History] Undo requested:', {
+          pastLength: history.past.length,
+          futureLength: history.future.length,
+        });
 
-          const history = JSON.parse(saved);
-          if (history.past.length === 0) return false;
-
-          const { nodes, edges } = get();
-          const previous = history.past[history.past.length - 1];
-          const newPast = history.past.slice(0, -1);
-          const newFuture = [...history.future, { nodes: [...nodes], edges: [...edges] }];
-
-          set({ nodes: previous.nodes, edges: previous.edges });
-
-          localStorage.setItem(
-            'workflow-canvas-history',
-            JSON.stringify({
-              past: newPast,
-              future: newFuture,
-            })
-          );
-
-          return true;
-        } catch (error) {
-          console.error('Failed to undo:', error);
+        if (history.past.length === 0) {
+          console.log('[History] Nothing to undo');
           return false;
         }
+
+        const previous = history.past[history.past.length - 1];
+        const newPast = history.past.slice(0, -1);
+        const newFuture = [...history.future, { nodes: [...nodes], edges: [...edges] }];
+
+        set({
+          nodes: previous.nodes,
+          edges: previous.edges,
+          history: {
+            past: newPast,
+            future: newFuture,
+          },
+        });
+
+        console.log('[History] Undo successful, restored to:', {
+          nodesCount: previous.nodes.length,
+          edgesCount: previous.edges.length,
+        });
+
+        return true;
       },
 
       redo: () => {
-        try {
-          const saved = localStorage.getItem('workflow-canvas-history');
-          if (!saved) return false;
+        const { history, nodes, edges } = get();
+        console.log('[History] Redo requested:', {
+          pastLength: history.past.length,
+          futureLength: history.future.length,
+        });
 
-          const history = JSON.parse(saved);
-          if (history.future.length === 0) return false;
-
-          const { nodes, edges } = get();
-          const next = history.future[history.future.length - 1];
-          const newFuture = history.future.slice(0, -1);
-          const newPast = [...history.past, { nodes: [...nodes], edges: [...edges] }];
-
-          set({ nodes: next.nodes, edges: next.edges });
-
-          localStorage.setItem(
-            'workflow-canvas-history',
-            JSON.stringify({
-              past: newPast,
-              future: newFuture,
-            })
-          );
-
-          return true;
-        } catch (error) {
-          console.error('Failed to redo:', error);
+        if (history.future.length === 0) {
+          console.log('[History] Nothing to redo');
           return false;
         }
+
+        const next = history.future[history.future.length - 1];
+        const newFuture = history.future.slice(0, -1);
+        const newPast = [...history.past, { nodes: [...nodes], edges: [...edges] }];
+
+        set({
+          nodes: next.nodes,
+          edges: next.edges,
+          history: {
+            past: newPast,
+            future: newFuture,
+          },
+        });
+
+        console.log('[History] Redo successful, restored to:', {
+          nodesCount: next.nodes.length,
+          edgesCount: next.edges.length,
+        });
+
+        return true;
       },
 
       canUndo: () => {
-        try {
-          const saved = localStorage.getItem('workflow-canvas-history');
-          if (!saved) return false;
-          const history = JSON.parse(saved);
-          return history.past.length > 0;
-        } catch (error) {
-          return false;
-        }
+        const { history } = get();
+        return history.past.length > 0;
       },
 
       canRedo: () => {
-        try {
-          const saved = localStorage.getItem('workflow-canvas-history');
-          if (!saved) return false;
-          const history = JSON.parse(saved);
-          return history.future.length > 0;
-        } catch (error) {
-          return false;
-        }
+        const { history } = get();
+        return history.future.length > 0;
       },
 
       // Auto Layout action
