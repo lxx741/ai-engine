@@ -245,85 +245,51 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
     }
   };
 
-  return (
-    <div className="h-14 bg-white border-b px-4 flex items-center justify-between">
-      {/* Left: Workflow Info */}
-      <div className="flex items-center gap-4">
-        <div>
-          <h1 className="text-lg font-semibold">{workflowName || '未命名工作流'}</h1>
-          {workflowDescription && (
-            <p className="text-xs text-muted-foreground">{workflowDescription}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Center: Stats */}
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-        <span>节点：{nodes.length}</span>
-        <span>连线：{edges.length}</span>
-      </div>
-
-      {/* Right: Actions */}
-      <div className="flex items-center gap-2">
-        <TemplateLibraryButton onClick={() => setShowTemplateSelector(true)} title="模板库" />
-
-        <UndoButton onClick={handleUndo} disabled={!canUndo()} title="撤销 (Ctrl+Z)" />
-        <RedoButton onClick={handleRedo} disabled={!canRedo()} title="重做 (Ctrl+Shift+Z)" />
-        <AutoLayoutButton onClick={handleAutoLayout} title="自动布局" />
-
-        <ValidateButton
-          onClick={handleValidate}
-          errorCount={getValidationStats(validationErrors).errors}
-          title="验证工作流"
-        />
-
-        <Button variant="outline" size="sm" onClick={handleClear} title="清空画布">
-          <RotateCcw className="w-4 h-4" />
-        </Button>
-
-        <Button variant="outline" size="sm" onClick={handleImport} title="导入 JSON">
-          <Upload className="w-4 h-4" />
-        </Button>
-
-        <Button variant="outline" size="sm" onClick={handleExport} title="导出 JSON">
-          <Download className="w-4 h-4" />
-        </Button>
-
-        <Button variant="outline" size="sm" onClick={handleSave} title="保存到本地">
-          <Save className="w-4 h-4" />
-        </Button>
-
-        {onCancel && (
-          <Button variant="outline" size="sm" onClick={onCancel}>
-            取消
-          </Button>
-        )}
-
-        {onSubmit ? (
-          <Button variant="default" size="sm" onClick={handleSubmit}>
-            <Play className="w-4 h-4 mr-2" />
-            运行工作流
-          </Button>
-        ) : (
-          <Button variant="default" size="sm" title="测试工作流">
-            <Play className="w-4 h-4" />
-          </Button>
-        )}
-      </div>
-    </div>
-  );
+  // State for editing workflow name
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editingName, setEditingName] = useState(workflowName || '');
 
   return (
     <>
       <div className="h-14 bg-white border-b px-4 flex items-center justify-between">
         {/* Left: Workflow Info */}
         <div className="flex items-center gap-4">
-          <div>
-            <h1 className="text-lg font-semibold">{workflowName || '未命名工作流'}</h1>
-            {workflowDescription && (
-              <p className="text-xs text-muted-foreground">{workflowDescription}</p>
-            )}
-          </div>
+          {isEditingName ? (
+            <input
+              className="w-64 px-2 py-1 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              value={editingName}
+              onChange={(e) => setEditingName(e.target.value)}
+              onBlur={() => {
+                setWorkflowName(editingName);
+                setIsEditingName(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setWorkflowName(editingName);
+                  setIsEditingName(false);
+                }
+                if (e.key === 'Escape') {
+                  setEditingName(workflowName || '');
+                  setIsEditingName(false);
+                }
+              }}
+              autoFocus
+            />
+          ) : (
+            <div
+              className="cursor-pointer hover:bg-muted/50 px-2 py-1 rounded"
+              onClick={() => {
+                setEditingName(workflowName || '');
+                setIsEditingName(true);
+              }}
+              title="点击编辑工作流名称"
+            >
+              <h1 className="text-lg font-semibold">{workflowName || '未命名工作流'}</h1>
+              {workflowDescription && (
+                <p className="text-xs text-muted-foreground">{workflowDescription}</p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Center: Stats */}
@@ -335,6 +301,16 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
           <TemplateLibraryButton onClick={() => setShowTemplateSelector(true)} title="模板库" />
+
+          <UndoButton onClick={handleUndo} disabled={!canUndo()} title="撤销 (Ctrl+Z)" />
+          <RedoButton onClick={handleRedo} disabled={!canRedo()} title="重做 (Ctrl+Shift+Z)" />
+          <AutoLayoutButton onClick={handleAutoLayout} title="自动布局" />
+
+          <ValidateButton
+            onClick={handleValidate}
+            errorCount={getValidationStats(validationErrors).errors}
+            title="验证工作流"
+          />
 
           <Button variant="outline" size="sm" onClick={handleClear} title="清空画布">
             <RotateCcw className="w-4 h-4" />

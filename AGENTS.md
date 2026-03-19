@@ -257,3 +257,77 @@ Before unified release:
 - [ ] Manual testing completed
 - [ ] Performance benchmark passes (< 2s for 100+ nodes)
 - [ ] Documentation updated
+
+---
+
+## Service Restart Protocol
+
+### After Each Agent Completes
+
+**Mandatory Steps**:
+1. **Stop all running services** (Ctrl+C in terminal)
+2. **Clear build caches**:
+   ```bash
+   # From project root
+   rm -rf apps/web/.next
+   rm -rf apps/server/dist
+   ```
+3. **Restart services**:
+   ```bash
+   pnpm dev
+   ```
+4. **Verify in browser**:
+   - Frontend: http://localhost:3001
+   - Backend: http://localhost:3000
+   - Test workflow page: http://localhost:3001/workflows/new
+
+### Rationale
+
+- **Next.js cache issues**: After significant code changes (especially new components), the `.next` build cache may become stale
+- **NestJS compilation**: The `dist` folder may contain outdated compiled code
+- **Prevents errors**: MODULE_NOT_FOUND, import resolution failures, and other cache-related issues
+- **Ensures clean state**: Each agent's work is tested in a fresh environment
+
+### Quick Commands
+
+```bash
+# Clean and restart everything
+pnpm clean && pnpm dev
+
+# Clean frontend only
+rm -rf apps/web/.next && pnpm dev:web
+
+# Clean backend only  
+rm -rf apps/server/dist && pnpm dev:server
+
+# Check if services are running
+lsof -ti:3000 && echo "Backend OK" || echo "Backend NOT running"
+lsof -ti:3001 && echo "Frontend OK" || echo "Frontend NOT running"
+```
+
+### Troubleshooting
+
+**Frontend shows "Internal Server Error"**:
+```bash
+# Kill stuck processes
+lsof -ti:3001 | xargs kill -9
+# Clear cache and restart
+rm -rf apps/web/.next
+pnpm dev:web
+```
+
+**Backend API not responding**:
+```bash
+# Kill stuck processes
+lsof -ti:3000 | xargs kill -9
+# Restart backend
+pnpm dev:server
+```
+
+**Both services unresponsive**:
+```bash
+# Kill all node processes on ports 3000 and 3001
+lsof -ti:3000,3001 | xargs kill -9
+# Full clean restart
+pnpm clean && pnpm dev
+```
