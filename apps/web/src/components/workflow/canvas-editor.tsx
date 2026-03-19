@@ -82,6 +82,11 @@ export function CanvasEditor({
     }
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
+  // Debug: Log node changes
+  useEffect(() => {
+    console.log('[Canvas Debug] Current nodes:', nodes.map((n) => ({ id: n.id, type: n.type })));
+  }, [nodes]);
+
   // Handle node changes (position updates, etc.)
   const onNodesChange = useCallback(
     (changes: any[]) => {
@@ -239,6 +244,7 @@ export function CanvasEditor({
             <Controls />
             <MiniMap
               nodeStrokeColor={(n) => {
+                console.log('[MiniMap Debug] nodeStrokeColor - id:', n.id, 'type:', n.type);
                 const colors: Record<string, string> = {
                   start: '#10b981',
                   llm: '#3b82f6',
@@ -247,9 +253,12 @@ export function CanvasEditor({
                   end: '#f43f5e',
                   tool: '#f97316',
                 };
-                return colors[n.type || 'default'] || '#64748b';
+                const color = colors[n.type || 'default'] || '#64748b';
+                console.log('[MiniMap Debug] Using color:', color);
+                return color;
               }}
               nodeColor={(n) => {
+                console.log('[MiniMap Debug] nodeColor - id:', n.id, 'type:', n.type);
                 const colors: Record<string, string> = {
                   start: '#d1fae5',
                   llm: '#dbeafe',
@@ -258,7 +267,9 @@ export function CanvasEditor({
                   end: '#ffe4e6',
                   tool: '#ffedd5',
                 };
-                return colors[n.type || 'default'] || '#f1f5f9';
+                const color = colors[n.type || 'default'] || '#f1f5f9';
+                console.log('[MiniMap Debug] Using color:', color);
+                return color;
               }}
               className="bg-white border rounded-lg shadow-lg"
             />

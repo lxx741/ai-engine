@@ -120,11 +120,6 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
     applyTemplate(layoutedNodes, rfEdges, template.name, template.description);
   };
 
-  const handleSave = () => {
-    saveToLocalStorage();
-    alert('✅ 工作流已保存到本地');
-  };
-
   const handleExport = () => {
     const data = {
       name: workflowName || 'Untitled Workflow',
@@ -316,17 +311,13 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
           <Trash className="w-4 h-4" />
         </Button>
 
-          <Button variant="outline" size="sm" onClick={handleImport} title="导入 JSON">
-            <Upload className="w-4 h-4" />
-          </Button>
+        <Button variant="outline" size="sm" onClick={handleImport} title="导入 JSON">
+          <Upload className="w-4 h-4" />
+        </Button>
 
-          <Button variant="outline" size="sm" onClick={handleExport} title="导出 JSON">
-            <Download className="w-4 h-4" />
-          </Button>
-
-          <Button variant="outline" size="sm" onClick={handleSave} title="保存到本地">
-            <Save className="w-4 h-4" />
-          </Button>
+        <Button variant="outline" size="sm" onClick={handleExport} title="导出 JSON">
+          <Download className="w-4 h-4" />
+        </Button>
 
           {onCancel && (
             <Button variant="outline" size="sm" onClick={onCancel}>
