@@ -4,7 +4,12 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Save, RotateCcw, Download, Upload, Settings, Play } from 'lucide-react';
 import { useCanvasStore } from './canvas-provider';
-import { TemplateLibraryButton } from './toolbar-buttons';
+import {
+  TemplateLibraryButton,
+  UndoButton,
+  RedoButton,
+  AutoLayoutButton,
+} from './toolbar-buttons';
 import { TemplateSelector } from './template-selector';
 import type { WorkflowTemplate } from './templates';
 import { autoLayout } from '@/lib/auto-layout';
@@ -28,7 +33,28 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
     applyTemplate,
     setWorkflowName,
     setWorkflowDescription,
+    pushToHistory,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    autoLayout: layoutCanvas,
   } = useCanvasStore();
+
+  const handleUndo = () => {
+    pushToHistory();
+    undo();
+  };
+
+  const handleRedo = () => {
+    pushToHistory();
+    redo();
+  };
+
+  const handleAutoLayout = () => {
+    pushToHistory();
+    layoutCanvas('horizontal');
+  };
 
   const handleTemplateSelect = (template: WorkflowTemplate) => {
     // Convert template nodes to React Flow Node format
@@ -221,6 +247,10 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
       {/* Right: Actions */}
       <div className="flex items-center gap-2">
         <TemplateLibraryButton onClick={() => setShowTemplateSelector(true)} title="模板库" />
+
+        <UndoButton onClick={handleUndo} disabled={!canUndo()} title="撤销 (Ctrl+Z)" />
+        <RedoButton onClick={handleRedo} disabled={!canRedo()} title="重做 (Ctrl+Shift+Z)" />
+        <AutoLayoutButton onClick={handleAutoLayout} title="自动布局" />
 
         <Button variant="outline" size="sm" onClick={handleClear} title="清空画布">
           <RotateCcw className="w-4 h-4" />

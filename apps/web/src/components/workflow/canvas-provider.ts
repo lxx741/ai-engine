@@ -54,6 +54,16 @@ interface CanvasState {
   saveToLocalStorage: () => void;
   loadFromLocalStorage: () => void;
   clearCanvas: () => void;
+
+  // Actions - History (Undo/Redo)
+  pushToHistory: () => void;
+  undo: () => boolean;
+  redo: () => boolean;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
+
+  // Actions - Auto Layout
+  autoLayout: (direction?: 'horizontal' | 'vertical') => void;
 }
 
 const DEFAULT_VIEWPORT: Viewport = { x: 0, y: 0, zoom: 1 };
@@ -215,6 +225,151 @@ export const useCanvasStore = create<CanvasState>()(
           workflowName: undefined,
           workflowDescription: undefined,
         }),
+
+      // History actions (Undo/Redo)
+      pushToHistory: () => {
+        const { nodes, edges } = get();
+        try {
+          const saved = localStorage.getItem('workflow-canvas-history');
+          const history = saved ? JSON.parse(saved) : { past: [], future: [] };
+
+          const newPast = [...history.past, { nodes: [...nodes], edges: [...edges] }];
+          if (newPast.length > 50) {
+            newPast.shift();
+          }
+
+          localStorage.setItem(
+            'workflow-canvas-history',
+            JSON.stringify({
+              past: newPast,
+              future: [],
+            })
+          );
+        } catch (error) {
+          console.error('Failed to push to history:', error);
+        }
+      },
+
+      undo: () => {
+        try {
+          const saved = localStorage.getItem('workflow-canvas-history');
+          if (!saved) return false;
+
+          const history = JSON.parse(saved);
+          if (history.past.length === 0) return false;
+
+          const { nodes, edges } = get();
+          const previous = history.past[history.past.length - 1];
+          const newPast = history.past.slice(0, -1);
+          const newFuture = [...history.future, { nodes: [...nodes], edges: [...edges] }];
+
+          set({ nodes: previous.nodes, edges: previous.edges });
+
+          localStorage.setItem(
+            'workflow-canvas-history',
+            JSON.stringify({
+              past: newPast,
+              future: newFuture,
+            })
+          );
+
+          return true;
+        } catch (error) {
+          console.error('Failed to undo:', error);
+          return false;
+        }
+      },
+
+      redo: () => {
+        try {
+          const saved = localStorage.getItem('workflow-canvas-history');
+          if (!saved) return false;
+
+          const history = JSON.parse(saved);
+          if (history.future.length === 0) return false;
+
+          const { nodes, edges } = get();
+          const next = history.future[history.future.length - 1];
+          const newFuture = history.future.slice(0, -1);
+          const newPast = [...history.past, { nodes: [...nodes], edges: [...edges] }];
+
+          set({ nodes: next.nodes, edges: next.edges });
+
+          localStorage.setItem(
+            'workflow-canvas-history',
+            JSON.stringify({
+              past: newPast,
+              future: newFuture,
+            })
+          );
+
+          return true;
+        } catch (error) {
+          console.error('Failed to redo:', error);
+          return false;
+        }
+      },
+
+      canUndo: () => {
+        try {
+          const saved = localStorage.getItem('workflow-canvas-history');
+          if (!saved) return false;
+          const history = JSON.parse(saved);
+          return history.past.length > 0;
+        } catch (error) {
+          return false;
+        }
+      },
+
+      canRedo: () => {
+        try {
+          const saved = localStorage.getItem('workflow-canvas-history');
+          if (!saved) return false;
+          const history = JSON.parse(saved);
+          return history.future.length > 0;
+        } catch (error) {
+          return false;
+        }
+      },
+
+      // Auto Layout action
+      autoLayout: (direction = 'horizontal') => {
+        const { nodes, edges, setNodes, setEdges } = get();
+        // Dynamic import to avoid circular dependency
+        import('@/lib/auto-layout').then(({ autoLayout, centerNodes }) => {
+          const workflowNodes = nodes.map((n) => ({
+            id: n.id,
+            type: n.type as any,
+            config: (n.data as any)?.config || {},
+            position: n.position,
+          }));
+          const workflowEdges = edges.map((e) => ({
+            id: e.id,
+            source: e.source,
+            target: e.target,
+            condition: (e.data as any)?.condition,
+          }));
+
+          const layoutedNodes = autoLayout(workflowNodes, workflowEdges, {
+            direction,
+            spacingX: 300,
+            spacingY: 150,
+          });
+          const centeredNodes = centerNodes(layoutedNodes, 1200, 800);
+
+          const rfNodes: Node[] = centeredNodes.map((n) => ({
+            ...n,
+            position: n.position || { x: 0, y: 0 },
+            data: {
+              name: n.config?.name || n.type,
+              description: n.config?.description,
+              config: n.config || {},
+            },
+          }));
+
+          setNodes(rfNodes);
+        });
+      },
     }),
     {
       name: STORAGE_KEY,

@@ -69,6 +69,7 @@ export function CanvasEditor({
     deleteNode,
     updateEdge,
     deleteEdge,
+    pushToHistory,
   } = useCanvasStore();
 
   // Initialize from props if provided
@@ -86,11 +87,12 @@ export function CanvasEditor({
     (changes: any[]) => {
       changes.forEach((change) => {
         if (change.type === 'position' && change.position) {
+          pushToHistory();
           updateNode(change.id, { position: change.position });
         }
       });
     },
-    [updateNode]
+    [pushToHistory, updateNode]
   );
 
   // Handle edge changes
@@ -108,6 +110,7 @@ export function CanvasEditor({
   // Handle new edge creation
   const onConnect = useCallback(
     (connection: Connection) => {
+      pushToHistory();
       const edge: Edge = {
         ...connection,
         id: `edge_${Date.now()}`,
@@ -115,7 +118,7 @@ export function CanvasEditor({
       };
       addEdgeToStore(edge);
     },
-    [addEdgeToStore]
+    [pushToHistory, addEdgeToStore]
   );
 
   // Handle node selection
@@ -179,9 +182,10 @@ export function CanvasEditor({
       };
 
       console.log('Dropped node:', newNode);
+      pushToHistory();
       setNodes([...nodes, newNode]);
     },
-    [setNodes, nodes]
+    [setNodes, nodes, pushToHistory]
   );
 
   // Handle node deletion (keyboard shortcut)

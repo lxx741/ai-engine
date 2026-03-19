@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCanvasStore } from './canvas-provider';
+import { VariablePicker } from './variable-picker';
 
 interface ConfigPanelProps {
   nodeId: string;
@@ -120,12 +121,30 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
 
                 <div className="space-y-2">
                   <Label>提示词</Label>
-                  <Textarea
-                    value={config.prompt || ''}
-                    onChange={(e) => handleConfigChange('prompt', e.target.value)}
-                    placeholder="输入提示词..."
-                    rows={6}
-                  />
+                  <div className="flex gap-2">
+                    <Textarea
+                      value={config.prompt || ''}
+                      onChange={(e) => handleConfigChange('prompt', e.target.value)}
+                      placeholder="输入提示词，使用 {{ nodes.xxx.output }} 引用变量"
+                      rows={6}
+                      className="flex-1"
+                    />
+                    <VariablePicker
+                      onSelect={(variable) => {
+                        const textarea = document.querySelector('textarea');
+                        if (textarea) {
+                          const start = textarea.selectionStart;
+                          const end = textarea.selectionEnd;
+                          const value = config.prompt || '';
+                          const newValue =
+                            value.substring(0, start) + variable + value.substring(end);
+                          handleConfigChange('prompt', newValue);
+                        } else {
+                          handleConfigChange('prompt', (config.prompt || '') + variable);
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
