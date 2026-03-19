@@ -65,8 +65,6 @@ interface CanvasState {
   pushToHistory: () => void;
   undo: () => boolean;
   redo: () => boolean;
-  canUndo: () => boolean;
-  canRedo: () => boolean;
 
   // Actions - Auto Layout
   autoLayout: (direction?: 'horizontal' | 'vertical') => void;
@@ -335,15 +333,9 @@ export const useCanvasStore = create<CanvasState>()(
         return true;
       },
 
-      canUndo: () => {
-        const { history } = get();
-        return history.past.length > 0;
-      },
-
-      canRedo: () => {
-        const { history } = get();
-        return history.future.length > 0;
-      },
+      // canUndo 和 canRedo 已移除，组件直接读取 history 状态
+      // canUndo: () => history.past.length > 0
+      // canRedo: () => history.future.length > 0
 
       // Auto Layout action
       autoLayout: (direction = 'horizontal') => {

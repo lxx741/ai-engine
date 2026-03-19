@@ -39,28 +39,30 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
     applyTemplate,
     setWorkflowName,
     setWorkflowDescription,
-    pushToHistory,
+    history,
     undo,
     redo,
-    canUndo,
-    canRedo,
     autoLayout: layoutCanvas,
     validate,
     setSelectedNode,
   } = useCanvasStore();
 
+  // Computed properties (reactive)
+  const canUndo = history.past.length > 0;
+  const canRedo = history.future.length > 0;
+
   const handleUndo = () => {
-    pushToHistory();
+    console.log('[Toolbar] Undo button clicked');
     undo();
   };
 
   const handleRedo = () => {
-    pushToHistory();
+    console.log('[Toolbar] Redo button clicked');
     redo();
   };
 
   const handleAutoLayout = () => {
-    pushToHistory();
+    console.log('[Toolbar] Auto-layout button clicked');
     layoutCanvas('horizontal');
   };
 
@@ -297,8 +299,8 @@ export function WorkflowToolbar({ onSubmit, onCancel }: WorkflowToolbarProps) {
         <div className="flex items-center gap-2">
           <TemplateLibraryButton onClick={() => setShowTemplateSelector(true)} title="模板库" />
 
-          <UndoButton onClick={handleUndo} disabled={!canUndo()} title="撤销 (Ctrl+Z)" />
-          <RedoButton onClick={handleRedo} disabled={!canRedo()} title="重做 (Ctrl+Shift+Z)" />
+          <UndoButton onClick={handleUndo} disabled={!canUndo} title="撤销 (Ctrl+Z)" />
+          <RedoButton onClick={handleRedo} disabled={!canRedo} title="重做 (Ctrl+Shift+Z)" />
           <AutoLayoutButton onClick={handleAutoLayout} title="自动布局" />
 
           <ValidateButton
