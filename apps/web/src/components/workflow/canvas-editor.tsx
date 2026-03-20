@@ -79,6 +79,12 @@ export function CanvasEditor({
   const canUndo = history.past.length > 0;
   const canRedo = history.future.length > 0;
 
+  // Clear canvas cache on mount (for new workflow page)
+  useEffect(() => {
+    localStorage.removeItem('workflow-canvas-state');
+    console.log('[CanvasEditor] Cleared canvas cache on mount');
+  }, []);
+
   // Initialize from props if provided
   useEffect(() => {
     if (initialNodes.length > 0) {
