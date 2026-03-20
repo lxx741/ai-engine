@@ -241,6 +241,10 @@ export const useCanvasStore = create<CanvasState>()(
           viewport: DEFAULT_VIEWPORT,
           workflowName: undefined,
           workflowDescription: undefined,
+          history: {
+            past: [],
+            future: [],
+          },
         }),
 
       // History actions (Undo/Redo)
@@ -434,7 +438,10 @@ export const useCanvasStore = create<CanvasState>()(
         edges: state.edges,
         workflowName: state.workflowName,
         workflowDescription: state.workflowDescription,
+        // Exclude history, selectedNode, selectedEdge, and viewport from persistence
       }),
+      // Skip initial hydration to allow manual control
+      skipHydration: false,
     }
   )
 );

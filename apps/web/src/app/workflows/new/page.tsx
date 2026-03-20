@@ -8,17 +8,22 @@ import { WorkflowForm } from '@/components/workflow/workflow-form';
 import { CanvasEditor } from '@/components/workflow/canvas-editor';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { isFeatureEnabled } from '@/lib/features';
+import { useCanvasStore } from '@/components/workflow/canvas-provider';
 
 export default function NewWorkflowPage() {
   const router = useRouter();
   const { data: apps, isLoading: appsLoading } = useApps();
   const createWorkflow = useCreateWorkflow();
+  const clearCanvas = useCanvasStore((state) => state.clearCanvas);
 
-  // Clear canvas cache when creating new workflow
+  // Clear canvas state when creating new workflow
   useEffect(() => {
-    localStorage.removeItem('workflow-canvas-state');
+    clearCanvas();
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('workflow-canvas-state');
+    }
     console.log('[NewWorkflow] Cleared canvas cache');
-  }, []);
+  }, [clearCanvas]);
 
   // Check if visual editor is enabled
   const useVisualEditor = isFeatureEnabled('VISUAL_EDITOR');

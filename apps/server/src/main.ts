@@ -1,6 +1,17 @@
 // Load environment variables from .env.local before any imports
 require('dotenv').config({ path: '.env.local' });
 
+// Register tsconfig-paths for workspace package resolution
+require('tsconfig-paths').register({
+  baseUrl: './',
+  paths: {
+    '@/*': ['./*'],
+    '@ai-engine/shared': ['../../packages/shared/src'],
+    '@ai-engine/core': ['../../packages/core/src'],
+    '@ai-engine/providers': ['../../packages/providers/src'],
+  },
+});
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
