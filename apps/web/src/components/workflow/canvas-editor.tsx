@@ -70,7 +70,14 @@ export function CanvasEditor({
     updateEdge,
     deleteEdge,
     pushToHistory,
+    undo,
+    redo,
+    history,
   } = useCanvasStore();
+
+  // Computed properties
+  const canUndo = history.past.length > 0;
+  const canRedo = history.future.length > 0;
 
   // Initialize from props if provided
   useEffect(() => {
@@ -193,10 +200,40 @@ export function CanvasEditor({
     [setNodes, nodes, pushToHistory]
   );
 
-  // Handle node deletion (keyboard shortcut)
+  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.key === 'Delete' || e.key === 'Backspace') && !isInputFocused()) {
+      // Skip if focus is in input field
+      if (isInputFocused()) {
+        return;
+      }
+
+      // Undo: Ctrl+Z or Cmd+Z
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        if (canUndo) {
+          console.log('[Keyboard] Undo shortcut triggered');
+          undo();
+        }
+        return;
+      }
+
+      // Redo: Ctrl+Shift+Z or Cmd+Shift+Z or Ctrl+Y or Cmd+Y
+      if ((e.ctrlKey || e.metaKey) && (
+        (e.shiftKey && e.key === 'z') ||
+        e.key === 'y' ||
+        e.key === 'Y'
+      )) {
+        e.preventDefault();
+        if (canRedo) {
+          console.log('[Keyboard] Redo shortcut triggered');
+          redo();
+        }
+        return;
+      }
+
+      // Delete: Delete or Backspace
+      if ((e.key === 'Delete' || e.key === 'Backspace')) {
         if (selectedNode) {
           deleteNode(selectedNode);
         }
@@ -208,7 +245,7 @@ export function CanvasEditor({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedNode, selectedEdge, deleteNode, deleteEdge]);
+  }, [undo, redo, canUndo, canRedo, selectedNode, selectedEdge, deleteNode, deleteEdge]);
 
   return (
     <div className="flex flex-col h-full">
