@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApps } from '@/hooks/use-apps';
 import { useCreateWorkflow } from '@/hooks/use-workflows';
@@ -12,6 +13,12 @@ export default function NewWorkflowPage() {
   const router = useRouter();
   const { data: apps, isLoading: appsLoading } = useApps();
   const createWorkflow = useCreateWorkflow();
+
+  // Clear canvas cache when creating new workflow
+  useEffect(() => {
+    localStorage.removeItem('workflow-canvas-state');
+    console.log('[NewWorkflow] Cleared canvas cache');
+  }, []);
 
   // Check if visual editor is enabled
   const useVisualEditor = isFeatureEnabled('VISUAL_EDITOR');
