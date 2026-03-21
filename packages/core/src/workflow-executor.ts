@@ -8,6 +8,7 @@ import {
   ConditionNodeExecutor,
   EndNodeExecutor,
   ToolNodeExecutor,
+  RagExecutor,
 } from './node-executors'
 
 export interface WorkflowExecutorConfig {
@@ -102,6 +103,7 @@ export class WorkflowExecutor implements IWorkflowExecutor {
     this.registerNodeExecutor(new ConditionNodeExecutor())
     this.registerNodeExecutor(new EndNodeExecutor())
     this.registerNodeExecutor(new ToolNodeExecutor())
+    this.registerNodeExecutor(new RagExecutor())
   }
 
   /**

@@ -1,6 +1,6 @@
 'use client';
 
-import { Play, Bot, Globe, GitBranch, StopCircle, Wrench } from 'lucide-react';
+import { Play, Bot, Globe, GitBranch, StopCircle, Wrench, Database } from 'lucide-react';
 
 const NODE_TYPES = [
   {
@@ -44,6 +44,13 @@ const NODE_TYPES = [
     icon: StopCircle,
     color: 'bg-rose-500',
     description: '工作流终点，输出结果',
+  },
+  {
+    type: 'rag',
+    label: '知识库',
+    icon: Database,
+    color: 'bg-cyan-500',
+    description: '从知识库检索相关信息',
   },
 ];
 

@@ -20,9 +20,9 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@/*": ["./*"],
-      "@ai-engine/shared": ["../../packages/shared/dist"],
-      "@ai-engine/core": ["../../packages/core/dist"],
-      "@ai-engine/providers": ["../../packages/providers/dist"]
+      "@ai-engine/shared": ["../../packages/shared/src"],
+      "@ai-engine/core": ["../../packages/core/src"],
+      "@ai-engine/providers": ["../../packages/providers/src"]
     }
   },
   "include": ["src/**/*"],

@@ -10,6 +10,7 @@ import { ModelModule } from './modules/model/model.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { ToolModule } from './modules/tool/tool.module';
+import { KnowledgeBaseModule } from './modules/knowledge-base/knowledge-base.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ToolModule } from './modules/tool/tool.module';
     ChatModule,
     WorkflowModule,
     ToolModule,
+    KnowledgeBaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

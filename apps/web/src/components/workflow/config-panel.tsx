@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { useCanvasStore } from './canvas-provider';
 import { VariablePicker } from './variable-picker';
+import { KnowledgeBaseSelect } from './knowledge-base-select';
 
 interface ConfigPanelProps {
   nodeId: string;
@@ -286,6 +287,105 @@ export function ConfigPanel({ nodeId, onClose }: ConfigPanelProps) {
                   placeholder='[{"name": "result", "value": "{{ nodes.llm.output }}"}]'
                 />
               </div>
+            )}
+
+            {node.type === 'rag' && (
+              <>
+                <div className="space-y-2">
+                  <Label>知识库</Label>
+                  <KnowledgeBaseSelect
+                    value={config.knowledgeBaseId || ''}
+                    onChange={(value) => handleConfigChange('knowledgeBaseId', value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>查询模板</Label>
+                  <div className="flex gap-2">
+                    <Textarea
+                      value={config.query || ''}
+                      onChange={(e) => handleConfigChange('query', e.target.value)}
+                      placeholder="输入查询，使用 {{ nodes.xxx.output }} 引用变量"
+                      rows={4}
+                      className="flex-1"
+                    />
+                    <VariablePicker
+                      onSelect={(variable) => {
+                        const textarea = document.querySelector('textarea');
+                        if (textarea) {
+                          const start = textarea.selectionStart;
+                          const end = textarea.selectionEnd;
+                          const value = config.query || '';
+                          const newValue =
+                            value.substring(0, start) + variable + value.substring(end);
+                          handleConfigChange('query', newValue);
+                        } else {
+                          handleConfigChange('query', (config.query || '') + variable);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>返回数量 (TopK)</Label>
+                    <span className="text-xs text-muted-foreground">{config.topK || 5}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1"
+                    max="20"
+                    value={config.topK || 5}
+                    onChange={(e) => handleConfigChange('topK', parseInt(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>相似度阈值</Label>
+                    <span className="text-xs text-muted-foreground">
+                      {(config.similarityThreshold || 0.3).toFixed(2)}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={config.similarityThreshold || 0.3}
+                    onChange={(e) =>
+                      handleConfigChange('similarityThreshold', parseFloat(e.target.value))
+                    }
+                    className="w-full"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    低于此阈值的结果将被过滤
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>输出格式</Label>
+                  <Select
+                    value={config.outputFormat || 'combined'}
+                    onValueChange={(v: 'raw' | 'combined') =>
+                      handleConfigChange('outputFormat', v)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="combined">组合文本（推荐）</SelectItem>
+                      <SelectItem value="raw">原始数组</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    组合文本：自动格式化检索结果为上下文
+                  </p>
+                </div>
+              </>
             )}
           </TabsContent>
 

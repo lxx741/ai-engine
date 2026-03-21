@@ -29,6 +29,12 @@ export default function Home() {
           工具管理
         </a>
         <a
+          href="/knowledge-bases"
+          className="px-6 py-3 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
+        >
+          知识库管理
+        </a>
+        <a
           href="http://localhost:3000/docs"
           className="px-6 py-3 border border-input rounded-md hover:bg-accent hover:text-accent-foreground"
         >

@@ -142,6 +142,13 @@ export const NODE_TYPES = {
     gradientFrom: 'from-orange-400',
     gradientTo: 'to-red-500',
   },
+  rag: {
+    type: 'rag',
+    label: '知识库',
+    colorClass: 'bg-cyan-500',
+    gradientFrom: 'from-cyan-400',
+    gradientTo: 'to-teal-500',
+  },
 } as const;
 
 export type NodeTypeKey = keyof typeof NODE_TYPES;

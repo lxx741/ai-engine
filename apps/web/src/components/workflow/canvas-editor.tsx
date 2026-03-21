@@ -19,7 +19,7 @@ import { useCanvasStore } from './canvas-provider';
 import { Sidebar } from './sidebar';
 import { ConfigPanel } from './config-panel';
 import { WorkflowToolbar } from './workflow-toolbar';
-import { StartNode, LLMNode, HTTPNode, ConditionNode, EndNode, ToolNode } from './nodes';
+import { StartNode, LLMNode, HTTPNode, ConditionNode, EndNode, ToolNode, RagNode } from './nodes';
 
 // Register custom node types
 const nodeTypes = {
@@ -29,6 +29,7 @@ const nodeTypes = {
   condition: ConditionNode,
   end: EndNode,
   tool: ToolNode,
+  rag: RagNode,
 };
 
 // Node type definitions for drag and drop
@@ -39,6 +40,7 @@ const NODE_TYPES = [
   { type: 'condition', label: '条件判断' },
   { type: 'tool', label: '工具调用' },
   { type: 'end', label: '结束节点' },
+  { type: 'rag', label: '知识库' },
 ];
 
 interface CanvasEditorProps {

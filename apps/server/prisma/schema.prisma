@@ -24,6 +24,7 @@ model App {
 
   conversations Conversation[]
   workflows     Workflow[]
+  knowledgeBase KnowledgeBase?
 
   @@index([apiKey])
   @@map("apps")
@@ -134,4 +135,66 @@ model AuditLog {
   @@index([action])
   @@index([entity])
   @@map("audit_logs")
+}
+
+// ============================================
+// Knowledge Base & RAG
+// ============================================
+
+/// 知识库表
+model KnowledgeBase {
+  id          String     @id @default(uuid())
+  appId       String     @map("app_id")
+  app         App        @relation(fields: [appId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  config      Json       @default("{}") // RAGConfig: chunkSize, chunkOverlap, similarityThreshold, etc.
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  documents   Document[]
+
+  @@unique([appId]) // One knowledge base per app
+  @@index([appId])
+  @@map("knowledge_bases")
+}
+
+/// 文档表
+model Document {
+  id             String       @id @default(uuid())
+  knowledgeBaseId String      @map("knowledge_base_id")
+  knowledgeBase  KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
+  name           String
+  originalName   String       @map("original_name")
+  fileType       String       @map("file_type") // pdf, docx, txt, json, csv
+  fileSize       Int          @map("file_size")
+  filePath       String       @map("file_path")
+  content        String       @db.Text
+  chunkCount     Int          @default(0) @map("chunk_count")
+  status         String       @default("pending") // pending, processing, completed, failed
+  metadata       Json         @default("{}")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  chunks         DocumentChunk[]
+
+  @@index([knowledgeBaseId])
+  @@index([status])
+  @@map("documents")
+}
+
+/// 文档分块表（带向量嵌入）
+model DocumentChunk {
+  id         String    @id @default(uuid())
+  documentId String    @map("document_id")
+  document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunkIndex Int       @map("chunk_index")
+  content    String    @db.Text
+  embedding  Float[]   // Pgvector embedding (1024 dimensions for mxbai-embed-large)
+  metadata   Json      @default("{}")
+  createdAt  DateTime  @default(now())
+
+  @@index([documentId])
+  @@index([embedding])
+  @@map("document_chunks")
 }
