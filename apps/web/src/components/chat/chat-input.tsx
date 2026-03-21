@@ -63,7 +63,7 @@ export function ChatInput({
   const maxCharacters = 2000;
 
   return (
-    <div className={cn('flex items-end gap-2 p-4 border-t bg-background', className)}>
+    <div className={cn('flex items-end gap-2 p-4 border-t bg-background shrink-0', className)}>
       <div className="flex-1 relative">
         <textarea
           ref={textareaRef}
