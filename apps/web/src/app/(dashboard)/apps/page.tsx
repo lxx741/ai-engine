@@ -33,14 +33,16 @@ export default function AppsPage() {
       ) : apps && apps.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {apps.map((app) => (
-            <Card key={app.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
+            <Card key={app.id} className="hover:shadow-lg transition-shadow h-48 flex flex-col">
+              <CardHeader className="pb-3">
                 <Link href={`/apps/${app.id}`}>
-                  <CardTitle className="text-xl">{app.name}</CardTitle>
+                  <CardTitle className="text-xl truncate">{app.name}</CardTitle>
                 </Link>
-                <CardDescription>{app.description || '暂无描述'}</CardDescription>
+                <CardDescription className="line-clamp-2 h-10 overflow-hidden">
+                  {app.description || '暂无描述'}
+                </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 flex items-end pt-0">
                 <p className="text-sm text-gray-500">
                   创建于 {new Date(app.createdAt).toLocaleDateString('zh-CN')}
                 </p>
