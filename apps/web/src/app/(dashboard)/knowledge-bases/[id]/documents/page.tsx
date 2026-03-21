@@ -47,7 +47,7 @@ export default function DocumentsPage() {
         name: file.name,
       });
       toast.success('文档上传成功，正在处理...');
-      
+
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -124,11 +124,7 @@ export default function DocumentsPage() {
               </Button>
               <h1 className="text-3xl font-bold inline-block">文档管理</h1>
             </div>
-            {knowledgeBase && (
-              <p className="text-muted-foreground">
-                知识库：{knowledgeBase.name}
-              </p>
-            )}
+            {knowledgeBase && <p className="text-muted-foreground">知识库：{knowledgeBase.name}</p>}
           </div>
         </div>
       </div>
@@ -138,9 +134,7 @@ export default function DocumentsPage() {
         <Card>
           <CardHeader>
             <CardTitle>上传文档</CardTitle>
-            <CardDescription>
-              支持格式：TXT, JSON, CSV, PDF, DOCX | 单文件最大 10MB
-            </CardDescription>
+            <CardDescription>支持格式：TXT, JSON, CSV, PDF, DOCX | 单文件最大 10MB</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
@@ -219,9 +213,7 @@ export default function DocumentsPage() {
               <FileText className="w-5 h-5" />
               文档列表
             </CardTitle>
-            <CardDescription>
-              已上传的文档及其处理状态
-            </CardDescription>
+            <CardDescription>已上传的文档及其处理状态</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -252,8 +244,8 @@ export default function DocumentsPage() {
                           doc.status === 'completed'
                             ? 'default'
                             : doc.status === 'failed'
-                            ? 'destructive'
-                            : 'secondary'
+                              ? 'destructive'
+                              : 'secondary'
                         }
                       >
                         {getStatusText(doc.status)}

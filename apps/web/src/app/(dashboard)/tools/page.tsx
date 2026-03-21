@@ -9,11 +9,11 @@ export default function ToolsPage() {
   const { data: tools, isLoading } = useTools();
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">工具管理</h1>
-          <p className="text-gray-500 mt-1">管理和测试可用的工具</p>
+          <p className="text-muted-foreground mt-1">管理和测试可用的工具</p>
         </div>
         <Link href="/workflows">
           <Button variant="outline">管理工作流</Button>

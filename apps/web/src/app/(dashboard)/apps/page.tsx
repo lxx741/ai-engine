@@ -10,16 +10,19 @@ export default function AppsPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="p-6">
         <div className="text-center text-red-500">加载失败：{error.message}</div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">我的应用</h1>
+        <div>
+          <h1 className="text-3xl font-bold">我的应用</h1>
+          <p className="text-muted-foreground mt-1">创建和管理您的 AI 应用</p>
+        </div>
         <Link href="/apps/new">
           <Button>新建应用</Button>
         </Link>

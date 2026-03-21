@@ -34,7 +34,8 @@ export default function KnowledgeBaseSettingsPage() {
       setConfig({
         chunkSize: knowledgeBase.config.chunkSize || DEFAULT_RAG_CONFIG.chunkSize,
         chunkOverlap: knowledgeBase.config.chunkOverlap || DEFAULT_RAG_CONFIG.chunkOverlap,
-        similarityThreshold: knowledgeBase.config.similarityThreshold || DEFAULT_RAG_CONFIG.similarityThreshold,
+        similarityThreshold:
+          knowledgeBase.config.similarityThreshold || DEFAULT_RAG_CONFIG.similarityThreshold,
         maxResults: knowledgeBase.config.maxResults || DEFAULT_RAG_CONFIG.maxResults,
       });
     }
@@ -54,9 +55,7 @@ export default function KnowledgeBaseSettingsPage() {
     }
   };
 
-  const quotaDisplay = stats
-    ? calculateQuotaDisplay(stats.totalSize, 500 * 1024 * 1024)
-    : null;
+  const quotaDisplay = stats ? calculateQuotaDisplay(stats.totalSize, 500 * 1024 * 1024) : null;
 
   return (
     <div className="container mx-auto p-6">
@@ -67,11 +66,7 @@ export default function KnowledgeBaseSettingsPage() {
           </Button>
           <h1 className="text-3xl font-bold inline-block">知识库配置</h1>
         </div>
-        {knowledgeBase && (
-          <p className="text-muted-foreground">
-            {knowledgeBase.name}
-          </p>
-        )}
+        {knowledgeBase && <p className="text-muted-foreground">{knowledgeBase.name}</p>}
       </div>
 
       <div className="grid gap-6">
@@ -111,8 +106,8 @@ export default function KnowledgeBaseSettingsPage() {
                       quotaDisplay.percentage > 90
                         ? 'bg-red-500'
                         : quotaDisplay.percentage > 70
-                        ? 'bg-yellow-500'
-                        : 'bg-green-500'
+                          ? 'bg-yellow-500'
+                          : 'bg-green-500'
                     }`}
                     style={{ width: `${quotaDisplay.percentage}%` }}
                   />
@@ -129,9 +124,7 @@ export default function KnowledgeBaseSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>分块配置</CardTitle>
-            <CardDescription>
-              控制文档如何被分割成小块用于向量检索
-            </CardDescription>
+            <CardDescription>控制文档如何被分割成小块用于向量检索</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
@@ -165,9 +158,7 @@ export default function KnowledgeBaseSettingsPage() {
                 step={10}
                 onValueChange={([value]) => setConfig({ ...config, chunkOverlap: value })}
               />
-              <p className="text-xs text-muted-foreground">
-                重叠部分保持上下文连贯性
-              </p>
+              <p className="text-xs text-muted-foreground">重叠部分保持上下文连贯性</p>
             </div>
           </CardContent>
         </Card>
@@ -176,9 +167,7 @@ export default function KnowledgeBaseSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>检索配置</CardTitle>
-            <CardDescription>
-              控制 RAG 检索的行为
-            </CardDescription>
+            <CardDescription>控制 RAG 检索的行为</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
@@ -212,9 +201,7 @@ export default function KnowledgeBaseSettingsPage() {
                 step={1}
                 onValueChange={([value]) => setConfig({ ...config, maxResults: value })}
               />
-              <p className="text-xs text-muted-foreground">
-                每次检索返回的最大结果数
-              </p>
+              <p className="text-xs text-muted-foreground">每次检索返回的最大结果数</p>
             </div>
           </CardContent>
         </Card>

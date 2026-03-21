@@ -67,7 +67,7 @@ export default function WorkflowsPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="p-6">
         <div className="flex items-center justify-center h-64">
           <p className="text-muted-foreground">加载中...</p>
         </div>
@@ -76,7 +76,7 @@ export default function WorkflowsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">工作流管理</h1>

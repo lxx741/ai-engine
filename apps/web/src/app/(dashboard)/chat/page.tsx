@@ -11,8 +11,8 @@ export default function ChatListPage() {
   const { data: apps, isLoading } = useApps();
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container max-w-4xl mx-auto py-12 px-4">
+    <div className="p-6">
+      <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">对话</h1>
           <p className="text-muted-foreground">选择一个应用开始对话</p>

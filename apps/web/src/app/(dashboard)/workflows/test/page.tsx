@@ -1,53 +1,46 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
-import { CanvasEditor } from '@/components/workflow/canvas-editor'
-import { useCanvasStore } from '@/components/workflow/canvas-provider'
-import { createBasicWorkflow } from '@/lib/workflow-dsl'
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { CanvasEditor } from '@/components/workflow/canvas-editor';
+import { useCanvasStore } from '@/components/workflow/canvas-provider';
+import { createBasicWorkflow } from '@/lib/workflow-dsl';
 
 interface TestResult {
-  name: string
-  passed: boolean
-  message: string
+  name: string;
+  passed: boolean;
+  message: string;
 }
 
 export default function WorkflowTestPage() {
-  const [testResults, setTestResults] = useState<TestResult[]>([])
-  const [activeTest, setActiveTest] = useState<'manual' | 'auto'>('manual')
-  const [showCanvas, setShowCanvas] = useState(false)
-  
-  const { 
-    nodes, 
-    edges, 
-    addNode, 
-    addEdge, 
-    setDefinition,
-    clearCanvas,
-    saveToLocalStorage,
-  } = useCanvasStore()
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [activeTest, setActiveTest] = useState<'manual' | 'auto'>('manual');
+  const [showCanvas, setShowCanvas] = useState(false);
+
+  const { nodes, edges, addNode, addEdge, setDefinition, clearCanvas, saveToLocalStorage } =
+    useCanvasStore();
 
   // Test suite
   const runTests = async () => {
-    const results: TestResult[] = []
+    const results: TestResult[] = [];
 
     // Test 1: Canvas initialization
     try {
-      clearCanvas()
+      clearCanvas();
       results.push({
         name: '画布初始化',
         passed: true,
         message: '画布清空成功',
-      })
+      });
     } catch (error) {
       results.push({
         name: '画布初始化',
         passed: false,
         message: `失败：${error}`,
-      })
+      });
     }
 
     // Test 2: Add node
@@ -60,19 +53,19 @@ export default function WorkflowTestPage() {
           name: '测试开始节点',
           config: { name: '开始' },
         },
-      }
-      addNode(startNode)
+      };
+      addNode(startNode);
       results.push({
         name: '添加节点',
         passed: true,
         message: `成功添加节点，当前节点数：${nodes.length + 1}`,
-      })
+      });
     } catch (error) {
       results.push({
         name: '添加节点',
         passed: false,
         message: `失败：${error}`,
-      })
+      });
     }
 
     // Test 3: Add another node
@@ -83,25 +76,25 @@ export default function WorkflowTestPage() {
         position: { x: 400, y: 100 },
         data: {
           name: '测试 LLM 节点',
-          config: { 
+          config: {
             name: 'LLM',
             prompt: '测试提示词',
             modelId: 'qwen-turbo',
           },
         },
-      }
-      addNode(llmNode)
+      };
+      addNode(llmNode);
       results.push({
         name: '添加第二个节点',
         passed: true,
         message: '成功添加 LLM 节点',
-      })
+      });
     } catch (error) {
       results.push({
         name: '添加第二个节点',
         passed: false,
         message: `失败：${error}`,
-      })
+      });
     }
 
     // Test 4: Add edge
@@ -110,19 +103,19 @@ export default function WorkflowTestPage() {
         id: 'test_edge_1',
         source: 'test_start',
         target: 'test_llm',
-      }
-      addEdge(edge)
+      };
+      addEdge(edge);
       results.push({
         name: '添加连线',
         passed: true,
         message: `成功添加连线，当前连线数：${edges.length + 1}`,
-      })
+      });
     } catch (error) {
       results.push({
         name: '添加连线',
         passed: false,
         message: `失败：${error}`,
-      })
+      });
     }
 
     // Test 5: Validate flow (skip for now)
@@ -130,61 +123,59 @@ export default function WorkflowTestPage() {
       name: '工作流验证',
       passed: true,
       message: '跳过（后端验证）',
-    })
+    });
 
     // Test 6: Save to localStorage
     try {
-      saveToLocalStorage()
+      saveToLocalStorage();
       results.push({
         name: '保存到本地',
         passed: true,
         message: '成功保存到 localStorage',
-      })
+      });
     } catch (error) {
       results.push({
         name: '保存到本地',
         passed: false,
         message: `失败：${error}`,
-      })
+      });
     }
 
     // Test 7: Load basic workflow
     try {
-      const basicWorkflow = createBasicWorkflow('测试工作流')
-      setDefinition(basicWorkflow)
+      const basicWorkflow = createBasicWorkflow('测试工作流');
+      setDefinition(basicWorkflow);
       results.push({
         name: '加载基础工作流',
         passed: true,
         message: '成功加载包含开始和结束节点的工作流',
-      })
+      });
     } catch (error) {
       results.push({
         name: '加载基础工作流',
         passed: false,
         message: `失败：${error}`,
-      })
+      });
     }
 
-    setTestResults(results)
-  }
+    setTestResults(results);
+  };
 
   // Auto-run tests on mount
   useEffect(() => {
     if (activeTest === 'auto') {
-      runTests()
+      runTests();
     }
-  }, [])
+  }, []);
 
-  const passedCount = testResults.filter(r => r.passed).length
-  const failedCount = testResults.filter(r => !r.passed).length
+  const passedCount = testResults.filter((r) => r.passed).length;
+  const failedCount = testResults.filter((r) => !r.passed).length;
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">可视化编辑器测试</h1>
-        <p className="text-muted-foreground">
-          测试可视化编排系统的各项功能
-        </p>
+        <p className="text-muted-foreground">测试可视化编排系统的各项功能</p>
       </div>
 
       {/* Test Controls */}
@@ -194,20 +185,18 @@ export default function WorkflowTestPage() {
           <CardDescription>运行自动化测试或手动测试</CardDescription>
         </CardHeader>
         <CardContent className="flex gap-4">
-          <Button onClick={runTests}>
-            运行自动化测试
-          </Button>
-          <Button 
+          <Button onClick={runTests}>运行自动化测试</Button>
+          <Button
             variant={showCanvas ? 'default' : 'outline'}
             onClick={() => setShowCanvas(!showCanvas)}
           >
             {showCanvas ? '隐藏画布' : '显示画布'}
           </Button>
-          <Button 
+          <Button
             variant="outline"
             onClick={() => {
-              setTestResults([])
-              clearCanvas()
+              setTestResults([]);
+              clearCanvas();
             }}
           >
             重置
@@ -261,9 +250,7 @@ export default function WorkflowTestPage() {
         <Card>
           <CardHeader>
             <CardTitle>手动测试画布</CardTitle>
-            <CardDescription>
-              在画布上拖拽节点、连线、配置，测试各项功能
-            </CardDescription>
+            <CardDescription>在画布上拖拽节点、连线、配置，测试各项功能</CardDescription>
           </CardHeader>
           <CardContent className="p-0 h-[600px]">
             <CanvasEditor />
@@ -281,9 +268,7 @@ export default function WorkflowTestPage() {
           <ol className="space-y-3 list-decimal list-inside">
             <li>
               <strong>拖拽测试</strong>
-              <p className="text-sm text-muted-foreground ml-6">
-                从左侧工具箱拖拽节点到画布
-              </p>
+              <p className="text-sm text-muted-foreground ml-6">从左侧工具箱拖拽节点到画布</p>
             </li>
             <li>
               <strong>连线测试</strong>
@@ -293,9 +278,7 @@ export default function WorkflowTestPage() {
             </li>
             <li>
               <strong>配置测试</strong>
-              <p className="text-sm text-muted-foreground ml-6">
-                点击节点，在右侧面板配置参数
-              </p>
+              <p className="text-sm text-muted-foreground ml-6">点击节点，在右侧面板配置参数</p>
             </li>
             <li>
               <strong>删除测试</strong>
@@ -317,13 +300,11 @@ export default function WorkflowTestPage() {
             </li>
             <li>
               <strong>导入/导出测试</strong>
-              <p className="text-sm text-muted-foreground ml-6">
-                导出 JSON 文件，然后重新导入
-              </p>
+              <p className="text-sm text-muted-foreground ml-6">导出 JSON 文件，然后重新导入</p>
             </li>
           </ol>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

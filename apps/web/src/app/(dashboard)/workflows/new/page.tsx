@@ -64,8 +64,8 @@ export default function NewWorkflowPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col">
-      <div className="container mx-auto p-6 flex-shrink-0">
+    <div className="h-full flex flex-col">
+      <div className="p-6 flex-shrink-0">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">
             {useVisualEditor ? '新建工作流（可视化）' : '新建工作流'}

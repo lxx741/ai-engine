@@ -2,7 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { useApps } from '@/hooks/use-apps';
-import { useKnowledgeBase, useCreateKnowledgeBase, useDeleteKnowledgeBase } from '@/hooks/use-knowledge-bases';
+import {
+  useKnowledgeBase,
+  useCreateKnowledgeBase,
+  useDeleteKnowledgeBase,
+} from '@/hooks/use-knowledge-bases';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,7 +26,9 @@ export default function KnowledgeBasesPage() {
     description: '',
   });
 
-  const { data: knowledgeBase, isLoading: kbLoading } = useKnowledgeBase(selectedAppId || undefined);
+  const { data: knowledgeBase, isLoading: kbLoading } = useKnowledgeBase(
+    selectedAppId || undefined
+  );
   const createKnowledgeBase = useCreateKnowledgeBase();
   const deleteKnowledgeBase = useDeleteKnowledgeBase();
 
@@ -79,7 +85,7 @@ export default function KnowledgeBasesPage() {
 
   if (appsLoading) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="p-6">
         <div className="flex items-center justify-center h-64">
           <p className="text-muted-foreground">加载中...</p>
         </div>
@@ -88,14 +94,12 @@ export default function KnowledgeBasesPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="p-6">
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">知识库管理</h1>
-            <p className="text-muted-foreground mt-1">
-              管理您的知识库，上传文档，配置 RAG 检索
-            </p>
+            <p className="text-muted-foreground mt-1">管理您的知识库，上传文档，配置 RAG 检索</p>
           </div>
         </div>
       </div>
@@ -147,33 +151,19 @@ export default function KnowledgeBasesPage() {
                     <div>
                       <h3 className="text-lg font-semibold">{knowledgeBase.name}</h3>
                       {knowledgeBase.description && (
-                        <p className="text-sm text-muted-foreground">
-                          {knowledgeBase.description}
-                        </p>
+                        <p className="text-sm text-muted-foreground">{knowledgeBase.description}</p>
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleNavigateToDocuments}
-                      >
+                      <Button variant="outline" size="sm" onClick={handleNavigateToDocuments}>
                         <FileText className="w-4 h-4 mr-2" />
                         文档管理
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleNavigateToSettings}
-                      >
+                      <Button variant="outline" size="sm" onClick={handleNavigateToSettings}>
                         <Settings className="w-4 h-4 mr-2" />
                         配置
                       </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={handleDelete}
-                      >
+                      <Button variant="destructive" size="sm" onClick={handleDelete}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         删除
                       </Button>
@@ -226,11 +216,7 @@ export default function KnowledgeBasesPage() {
                   />
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowCreateForm(false)}
-                  >
+                  <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>
                     取消
                   </Button>
                   <Button type="submit">创建</Button>
