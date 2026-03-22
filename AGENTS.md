@@ -5,220 +5,93 @@
 Enterprise AI Application Engine (like Coze/Dify) with NestJS backend and Next.js frontend.
 
 **Structure:**
+
 - `apps/server` - NestJS backend API
 - `apps/web` - Next.js frontend (port 3001)
 - `packages/core` - Core business logic
 - `packages/providers` - LLM provider implementations (Aliyun, Ollama)
 - `packages/shared` - Shared types and utilities
 
-## Build & Development Commands
+## Quick Commands
 
-### Root Level (pnpm workspace)
 ```bash
-pnpm dev              # Run both server and web concurrently
-pnpm dev:server       # Backend only (NestJS on default port)
-pnpm dev:web          # Frontend only (Next.js on port 3001)
-pnpm build            # Build all packages
-pnpm lint             # Lint all packages
-pnpm test             # Run all tests
-```
+pnpm dev                    # Run both server and web
+pnpm build                  # Build all packages
+pnpm lint                   # Lint all packages
+pnpm test                   # Run all tests
 
-### Server (apps/server)
-```bash
-pnpm --filter @ai-engine/server dev          # Dev mode with watch
-pnpm --filter @ai-engine/server build        # Compile to dist/
-pnpm --filter @ai-engine/server lint         # ESLint with auto-fix
-pnpm --filter @ai-engine/server test         # Run Vitest tests
-pnpm --filter @ai-engine/server test:watch   # Watch mode
-pnpm --filter @ai-engine/server test:cov     # With coverage
-pnpm --filter @ai-engine/server db:generate  # Prisma generate
-pnpm --filter @ai-engine/server db:migrate   # Prisma migrate dev
-pnpm --filter @ai-engine/server db:seed      # Seed database
-```
+# Server
+pnpm --filter @ai-engine/server dev
+pnpm --filter @ai-engine/server build
 
-### Web (apps/web)
-```bash
-pnpm --filter @ai-engine/web dev      # Next.js dev server (port 3001)
-pnpm --filter @ai-engine/web build    # Next.js build
-pnpm --filter @ai-engine/web lint     # Next.js lint
-```
+# Web
+pnpm --filter @ai-engine/web dev
+pnpm --filter @ai-engine/web build
 
-### Running Single Tests
-```bash
-# Server - run specific test file
-pnpm --filter @ai-engine/server test -- chat.service.spec.ts
-
-# Server - run test by pattern
-pnpm --filter @ai-engine/server test -- -t "ChatService"
-
-# Server - watch single file
-pnpm --filter @ai-engine/server test:watch chat.service.spec.ts
-
-# Server - with coverage
-pnpm --filter @ai-engine/server test:cov
-
-# E2E tests
-pnpm --filter @ai-engine/server test:e2e
-
-# Packages (core, providers, shared)
-pnpm --filter @ai-engine/core test -- variable-manager.spec.ts
-pnpm --filter @ai-engine/providers test -- provider-factory.test.ts
+# Database
+pnpm db:generate            # Prisma generate
+pnpm db:migrate             # Prisma migrate dev
 ```
 
 ## Code Style Guidelines
 
-### TypeScript Configuration
-- **Target:** ES2022 (server), ESNext (web)
-- **Module:** CommonJS (server), ESM (web/Next.js)
-- **Strict mode:** Server has relaxed strictness (strictNullChecks: false), web is fully strict
-- **Path aliases:** @ai-engine/* (server packages), @/* (src shortcut)
+详见 [代码规范](./docs/best-practices/code-style.md)。
 
-### Import Conventions
-1. **Order:** External packages → Internal modules → Relative imports
-2. **NestJS:** Use barrel exports from @nestjs/common
-3. **Internal:** Use path aliases (@ai-engine/core, @ai-engine/shared)
-4. **Relative:** Use `.ts` extension omission
+## Architecture Patterns
 
-```typescript
-// ✅ Correct
-import { Module, Injectable } from '@nestjs/common';
-import { getProviderFactory } from '@ai-engine/providers';
-import { ChatMessage } from '@ai-engine/shared';
-import { PrismaService } from '../../prisma/prisma.service';
-```
+**NestJS Backend:**
 
-### Naming Conventions
-- **Files:** kebab-case for files, PascalCase for components/classes
-- **Classes:** PascalCase (services, controllers, modules)
-- **Interfaces:** PascalCase (often with suffix: `Service`, `Controller`, `Module`)
-- **Types:** PascalCase
-- **Variables/Functions:** camelCase
-- **Constants:** UPPER_SNAKE_CASE
-- **Private members:** No prefix convention enforced
+- Modules: Feature-based (`modules/chat`, `modules/workflow`)
+- Services: Business logic, stateless, injectable
+- Controllers: HTTP layer only
+- DTOs: class-validator validation
 
-### Formatting (Prettier)
-```json
-{
-  "semi": true,
-  "trailingComma": "es5",
-  "singleQuote": true,
-  "printWidth": 100,
-  "tabWidth": 2,
-  "useTabs": false,
-  "arrowParens": "always",
-  "endOfLine": "lf"
-}
-```
+**Next.js Frontend:**
 
-### Error Handling
-1. **NestJS:** Use built-in HTTP exceptions and filters
-2. **Async operations:** Try-catch with proper error logging
-3. **Logger:** Use NestJS Logger class with static name
-4. **Validation:** Use class-validator with class-transformer
+- App Router: Next.js 14 app directory
+- State: Zustand (client), TanStack Query (server)
+- Styling: Tailwind CSS + shadcn/ui
 
-```typescript
-// ✅ Correct
-private readonly logger = new Logger(ChatService.name);
+## Database (Prisma)
 
-try {
-  await this.riskyOperation();
-} catch (error) {
-  this.logger.error(`Operation failed: ${error instanceof Error ? error.message : 'Unknown'}`);
-  throw error;
-}
-```
-
-### Testing Conventions
-- **Framework:** Vitest (server), none configured for web yet
-- **File naming:** `*.spec.ts` (NestJS convention), `*.test.ts` (packages)
-- **Test structure:** describe/it blocks with descriptive names
-- **Mocks:** Use vi.mock() for module mocking, vi.fn() for spies
-- **Async tests:** Use async/await pattern
-- **Setup:** Direct instantiation with mocked dependencies (not TestingModule)
-
-```typescript
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-
-vi.mock('@ai-engine/providers', async () => {
-  const actual = await vi.importActual('@ai-engine/providers');
-  return { ...actual, getProviderFactory: vi.fn(...) };
-});
-
-describe('ChatService', () => {
-  let service: ChatService;
-  
-  beforeEach(() => {
-    service = new ChatService(mockPrisma, mockConversation, mockMessage);
-    vi.clearAllMocks();
-  });
-  
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-});
-```
-
-### Architecture Patterns
-
-#### NestJS Backend
-- **Modules:** Feature-based organization (`modules/chat`, `modules/workflow`)
-- **Services:** Business logic, stateless, injectable
-- **Controllers:** HTTP layer only, delegate to services
-- **DTOs:** Use class-validator for input validation
-- **Prisma:** Singleton service for database access
-
-#### Next.js Frontend
-- **App Router:** Using Next.js 14 app directory structure
-- **Components:** Organized by feature (`components/chat/`)
-- **Hooks:** Custom hooks in `hooks/` directory
-- **State:** Zustand for client state, React Query for server state
-- **Styling:** Tailwind CSS with shadcn/ui components
-
-### Database (Prisma)
 ```bash
-pnpm --filter @ai-engine/server db:generate   # Generate Prisma Client
-pnpm --filter @ai-engine/server db:migrate    # Create and apply migration
-pnpm --filter @ai-engine/server db:migrate:prod  # Production deploy (no prompts)
-pnpm --filter @ai-engine/server db:studio     # Open Prisma Studio GUI
-pnpm --filter @ai-engine/server db:seed       # Run seed script
+pnpm --filter @ai-engine/server db:generate
+pnpm --filter @ai-engine/server db:migrate
+pnpm --filter @ai-engine/server db:migrate:prod  # Production
+pnpm --filter @ai-engine/server db:studio
 ```
 
-### Environment Variables
-- **Development:** `.env.local` (gitignored) or `.env`
-- **Template:** `.env.example` for required variables
-- **Loading:** @nestjs/config with envFilePath configuration
+## Best Practices Documentation
 
-### Key Dependencies
-- **Backend:** NestJS 10, Prisma 5, class-validator, winston
-- **Frontend:** Next.js 14, React 18, TanStack Query, Zustand, shadcn/ui
-- **Shared:** TypeScript 5, ESLint 8, Prettier 3
-
-### Common Tasks
-1. **Add new feature module:** Use NestJS CLI `nest g module modules/feature`
-2. **Add provider:** Implement in `packages/providers/` and register in ProviderFactory
-3. **Add API endpoint:** Create controller method with proper DTO validation
-4. **Database change:** Update schema.prisma, run db:migrate, regenerate client
+- [📚 索引](./docs/best-practices/index.md)
+- [代码规范](./docs/best-practices/code-style.md)
+- [NestJS](./docs/best-practices/nestjs.md)
+- [Next.js](./docs/best-practices/nextjs.md)
+- [Prisma](./docs/best-practices/prisma.md)
+- [Zustand](./docs/best-practices/zustand.md)
+- [TanStack Query](./docs/best-practices/tanstack-query.md)
+- [shadcn/ui](./docs/best-practices/shadcn-ui.md)
 
 ---
 
-## Multi-Agent Development Configuration
+## Multi-Agent Configuration
 
 ### Hardware Profile
-- **Recommended Concurrent Agents**: Maximum 3 agents (M4 16GB optimized)
-- **Memory per Agent**: ~500MB-1GB RAM
+
+- **Max Concurrent Agents:** 3 (M4 16GB)
+- **Memory per Agent:** ~500MB-1GB RAM
 
 ### Zero-Conflict Strategy
 
-**Core Rule**: Agents NEVER modify the same file simultaneously.
+**Core Rule:** Agents NEVER modify the same file simultaneously.
 
-**File Isolation Patterns**:
-1. **New Files**: Each agent creates independent files - ✅ Safe for parallel execution
-2. **Shared Components**: Use component isolation pattern (e.g., `toolbar-buttons/` directory)
-3. **Store Actions**: Each agent adds independent actions to shared stores, merge sequentially
+**File Isolation Patterns:**
+
+1. **New Files:** Each agent creates independent files - ✅ Safe
+2. **Shared Components:** Use component isolation (e.g., `toolbar-buttons/`)
+3. **Store Actions:** Each agent adds independent actions, merge sequentially
 
 ### Toolbar Buttons Pattern
-
-To avoid conflicts in shared toolbar files, use isolated button components:
 
 ```
 apps/web/src/components/workflow/toolbar-buttons/
@@ -231,103 +104,37 @@ apps/web/src/components/workflow/toolbar-buttons/
 └── preview-button.tsx          # Agent 3
 ```
 
-**Usage in workflow-toolbar.tsx**:
-```typescript
-import { TemplateLibraryButton, UndoButton, /* ... */ } from './toolbar-buttons';
-
-// Each agent only imports and uses their own button component
-```
-
 ### Git Workflow
-- **Branch Naming**: `feature/{function-name}` (e.g., `feature/templates`, `feature/undo-redo`)
-- **Merge Strategy**: Sequential merge after each agent completes and passes tests
-- **Testing**: Test immediately after each agent completes
-- **Release**: Unified release after all agents complete
+
+- **Branch Naming:** `feature/{function-name}`
+- **Merge Strategy:** Sequential merge after tests pass
+- **Testing:** Test immediately after each agent completes
 
 ### Quality Gates
 
-Before merging each agent's work:
+Before merging:
+
 - [ ] TypeScript compilation passes (`pnpm build`)
 - [ ] ESLint passes (`pnpm lint`)
-- [ ] Prettier formatted (`pnpm exec prettier --write`)
-- [ ] Component tests pass (if applicable)
-
-Before unified release:
-- [ ] Integration tests pass
-- [ ] Manual testing completed
-- [ ] Performance benchmark passes (< 2s for 100+ nodes)
-- [ ] Documentation updated
+- [ ] Prettier formatted
+- [ ] Tests pass
 
 ---
 
 ## Service Restart Protocol
 
-### After Each Agent Completes
+**After Each Agent Completes:**
 
-**Mandatory Steps**:
-1. **Stop all running services** (Ctrl+C in terminal)
-2. **Clear build caches**:
-   ```bash
-   # From project root
-   rm -rf apps/web/.next
-   rm -rf apps/server/dist
-   ```
-3. **Restart services**:
-   ```bash
-   pnpm dev
-   ```
-4. **Verify in browser**:
-   - Frontend: http://localhost:3001
-   - Backend: http://localhost:3000
-   - Test workflow page: http://localhost:3001/workflows/new
+1. Stop services (Ctrl+C)
+2. Clear caches: `rm -rf apps/web/.next apps/server/dist`
+3. Restart: `pnpm dev`
+4. Verify: http://localhost:3001
 
-### Rationale
-
-- **Next.js cache issues**: After significant code changes (especially new components), the `.next` build cache may become stale
-- **NestJS compilation**: The `dist` folder may contain outdated compiled code
-- **Prevents errors**: MODULE_NOT_FOUND, import resolution failures, and other cache-related issues
-- **Ensures clean state**: Each agent's work is tested in a fresh environment
-
-### Quick Commands
+**Quick Commands:**
 
 ```bash
-# Clean and restart everything
-pnpm clean && pnpm dev
-
-# Clean frontend only
-rm -rf apps/web/.next && pnpm dev:web
-
-# Clean backend only  
-rm -rf apps/server/dist && pnpm dev:server
-
-# Check if services are running
-lsof -ti:3000 && echo "Backend OK" || echo "Backend NOT running"
-lsof -ti:3001 && echo "Frontend OK" || echo "Frontend NOT running"
-```
-
-### Troubleshooting
-
-**Frontend shows "Internal Server Error"**:
-```bash
-# Kill stuck processes
-lsof -ti:3001 | xargs kill -9
-# Clear cache and restart
-rm -rf apps/web/.next
-pnpm dev:web
-```
-
-**Backend API not responding**:
-```bash
-# Kill stuck processes
-lsof -ti:3000 | xargs kill -9
-# Restart backend
-pnpm dev:server
-```
-
-**Both services unresponsive**:
-```bash
-# Kill all node processes on ports 3000 and 3001
-lsof -ti:3000,3001 | xargs kill -9
-# Full clean restart
-pnpm clean && pnpm dev
+pnpm clean && pnpm dev                              # Full restart
+lsof -ti:3000,3001 | xargs kill -9                  # Kill stuck processes
+lsof -ti:3000 && echo "Backend OK" || echo "Down"   # Check backend
+lsof -ti:3001 && echo "Frontend OK" || echo "Down"  # Check frontend
 ```
